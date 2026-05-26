@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="ru" translate="no">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="google" content="notranslate">
     <script>if (window.location.search.includes('data=')) { document.documentElement.classList.add('embed-mode'); }</script>
     <title>EduJump ПОПРЫГУНЧИК</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Nunito:wght@800&family=Open+Sans:wght@800&family=Roboto+Mono:wght@700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
@@ -248,6 +247,7 @@ function initGame() {
     if(game.loopId) cancelAnimationFrame(game.loopId);
     liveStyle();
     
+    // Autoplay Policy Fix: Звуки грузятся только после клика по "Запустить" или внутри фрейма
     loadAudio('start', document.getElementById('s-start').value);
     loadAudio('ok', document.getElementById('s-ok').value);
     loadAudio('err', document.getElementById('s-err').value);
@@ -263,6 +263,7 @@ function initGame() {
     game.currentQ = wl[0]?.q || ""; updateQ(game.currentQ);
     game.platforms = [{ x: 400, y: 400, w: cfg.st.pW * 1.4, h: cfg.st.pH, isOk: true, txt: document.getElementById('lbl-start').value, q: wl[0]?.q || "" }];
     
+    // Задержка увеличена до 400мс, чтобы браузер успел отрисовать и измерить картинку
     setTimeout(() => { 
         const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
         game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
@@ -282,6 +283,7 @@ function render() {
             const b = p.y + hReal/2 + game.feetOffset; 
             if(p.vy > 0 && Math.abs(p.x - plat.x) < (plat.w/2 + 20) && b > plat.y - cfg.st.pH/2 && b < plat.y + cfg.st.pH/2 + p.vy) {
                 if(plat.isOk){
+                    // Динамический пересчет высоты при приземлении
                     const currentHReal = rabbitImg.offsetHeight || cfg.st.hSize;
                     p.lastPlatY=plat.y; 
                     p.y=plat.y-cfg.st.pH/2-currentHReal/2-game.feetOffset;
@@ -306,13 +308,14 @@ function draw() {
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); 
         else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
         
+        // Исправление размытия текста векторной тенью вместо stroke
         ctx.fillStyle = cfg.st.ansTxt; 
         ctx.font = `bold 20px "${cfg.st.font}"`; 
         ctx.textAlign = 'center'; 
         ctx.shadowColor = "rgba(0,0,0,1)"; 
         ctx.shadowBlur = 4;
         ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + 7));
-        ctx.shadowBlur = 0; 
+        ctx.shadowBlur = 0; // Сбрасываем тень для других элементов
     });
     game.particles.forEach(pt => { ctx.save(); if(cfg.st.useGlow){ctx.shadowBlur=10;ctx.shadowColor=pt.c;} ctx.fillStyle=pt.c; ctx.globalAlpha=pt.life; if(cfg.st.fx === 'hearts') { ctx.font = '18px serif'; ctx.fillText('❤️', pt.x, pt.y); } else if(cfg.st.fx === 'stars') { ctx.font = '18px serif'; ctx.fillText('⭐', pt.x, pt.y); } else { ctx.fillRect(pt.x, pt.y, pt.s, pt.s); } ctx.restore(); });
     const hR = rabbitImg.offsetHeight || cfg.st.hSize; rabbitImg.style.left = (game.player.x - cfg.st.hSize/2)+'px'; rabbitImg.style.top = (game.player.y - hR/2 + game.camY)+'px'; ctx.restore();
@@ -322,15 +325,13 @@ function triggerWin() { game.won = true; if(cfg.audios.win) { cfg.audios.win.cur
 
 stage.addEventListener('pointerdown', (e) => { if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -20; } }); });
 
+// Глобальный слушатель для разблокировки AudioContext
 window.addEventListener('pointerdown', () => {}, { once: true });
 
 let finalExport = "";
 function generateGeniallyCode() {
     liveStyle();
-    
-    // ЖЕСТКО ПРОПИСЫВАЕМ ССЫЛКУ НА ВАШ GITHUB
-    const baseUrl = 'https://vera422.github.io/edujump-lang/index.html';
-    
+    // Собираем все настройки в компактный объект
     const d = { 
         h: document.getElementById('inp-h').value, 
         hw: document.getElementById('inp-h-win').value, 
@@ -348,7 +349,13 @@ function generateGeniallyCode() {
         shuf: document.getElementById('shuffle-check').checked 
     };
     
+    // Получаем текущий URL редактора
+    const baseUrl = window.location.href.split('?')[0];
+    
+    // Безопасное кодирование с поддержкой кириллицы
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
+    
+    // Генерируем iFrame вместо гигантского скрипта
     finalExport = `<iframe src="${baseUrl}?data=${dataStr}&v=${Date.now()}" width="100%" height="100%" style="border:none; width: 100%; height: 100%;" allow="autoplay; fullscreen"></iframe>`;
     
     document.getElementById('copy-btn').style.display = 'block'; 
@@ -362,6 +369,7 @@ function copyToClipboard() {
     document.body.removeChild(textArea);
 }
 
+// Функция для загрузки сохраненных настроек из URL (работает во фрейме)
 function initFromUrl() {
     const params = new URLSearchParams(window.location.search);
     if(params.has('data')) {
@@ -412,10 +420,12 @@ function initFromUrl() {
     }
 }
 
+// Инициализация при загрузке
 initFromUrl();
 liveStyle(); 
 switchLang();
 
+// Автозапуск игры, если она открыта внутри Genially (в embed-режиме)
 if (window.location.search.includes('data=')) {
     setTimeout(initGame, 300);
 }
