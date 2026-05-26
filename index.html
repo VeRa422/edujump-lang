@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>EduJump ПОПРЫГУНЧИК - Multi-Lang & Math Mode</title>
+    <script>
+        // Мгновенно скрываем редактор, если игра запущена через iframe
+        if (window.location.search.includes('data=')) {
+            document.write('<style>#editor { display: none !important; } #game-area { width: 100vw !important; height: 100vh !important; flex: none !important; }</style>');
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Nunito:wght@800&family=Open+Sans:wght@800&family=Roboto+Mono:wght@700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        :root { --bg: #020617; --pn: #0f172a; --bd: #1e293b; --acc: #f59e0b; --txt: #f8fafc; --ok: #10b981; }
+        body { margin: 0; font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--txt); height: 100vh; display: flex; overflow: hidden; }
+        #editor { width: 440px; background: var(--pn); border-right: 2px solid var(--bd); display: flex; flex-direction: column; padding: 15px; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        .scroll { flex: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 10px; }
+        h2 { font-family: 'Chakra Petch'; color: var(--acc); font-size: 0.8rem; margin: 15px 0 8px; text-transform: uppercase; border-bottom: 1px solid var(--bd); padding-bottom: 4px; letter-spacing: 1px; }
+        .box { background: rgba(255,255,255,0.03); border: 1px solid var(--bd); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
+        .ui-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .ui-item { display: flex; flex-direction: column; gap: 4px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
+        .ui-item label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: bold; margin: 0; }
+        input[type="color"] { -webkit-appearance: none; border: 2px solid #334155; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; background: none; padding: 0; overflow: hidden; margin: auto; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+        textarea { width: 100%; height: 150px; background: #020617; color: #fff; border: 1px solid var(--bd); border-radius: 4px; font-size: 13px; padding: 10px; resize: none; font-family: monospace; line-height: 1.4; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 8px; margin: 4px 0; border-radius: 4px; border: 1px solid var(--bd); background: #020617; color: #fff; font-size: 11px; box-sizing: border-box; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-family: 'Chakra Petch'; text-transform: uppercase; transition: 0.2s; width: 100%; }
+        .btn-play { background: var(--acc); color: #000; font-size: 1.1rem; margin-top: 5px; }
+        .btn-gen { background: var(--ok); color: #fff; margin-top: 10px; }
+        .btn-copy { background: #3b82f6; color: #fff; margin-top: 10px; display: none; }
+        #game-area { flex: 1; display: flex; justify-content: center; align-items: center; background: #000; position: relative; overflow: hidden; }
+        #stage { position: relative; width: 800px; height: 450px; border-radius: 20px; overflow: hidden; background: #020617; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        canvas { position: absolute; top: 0; left: 0; z-index: 1; touch-action: none; cursor: pointer; width: 800px; height: 450px; }
+        #rabbit-gif { position: absolute; z-index: 10; pointer-events: none; transform-origin: center bottom; display: none; height: auto; }
+        #vol-ui { position: absolute; top: 15px; right: 15px; z-index: 110; background: rgba(15, 23, 42, 0.6); padding: 8px 12px; border-radius: 20px; backdrop-filter: blur(5px); display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); color:#fff; }
+        #win-ui { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 85%; max-height: 90%; padding: 30px; border-radius: 30px; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(12px); box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center; box-sizing: border-box; }
+        #win-rabbit-gif { height: auto; margin-bottom: 20px; display: none; max-height: 180px; width: auto; object-fit: contain; }
+        #win-title { width: 100%; word-wrap: break-word; font-size: 2.2rem; margin: 10px 0; }
+        #creator-credit { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; }
+        #creator-credit img { max-width: 140px; height: auto; margin-bottom: 10px; opacity: 0.8; }
+        #q-overlay { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 500px; min-height: 60px; z-index: 50; display: none; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px; box-sizing: border-box; font-weight: bold; font-size: 24px; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="editor">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h1 style="font-family:'Chakra Petch'; color:var(--acc); margin:0; font-size:1.4rem">ПОПРЫГУНЧИК</h1>
+        <select id="lang-sel" style="width: auto; padding: 2px;" onchange="switchLang()">
+            <option value="ru">🇷🇺 RU</option>
+            <option value="en">🇺🇸 EN</option>
+            <option value="math">📐 MATH</option>
+        </select>
+    </div>
+
+    <div class="scroll">
+        <h2>🎨 ЦВЕТА И FX</h2>
+        <div class="box">
+            <div class="ui-grid">
+                <div class="ui-item"><label id="l-font">Шрифт</label>
+                    <select id="st-font" onchange="liveStyle()">
+                        <option value="Nunito">Nunito</option><option value="Chakra Petch">Chakra Petch</option>
+                        <option value="Comfortaa">Comfortaa</option><option value="Roboto Mono">Roboto Mono</option>
+                    </select>
+                </div>
+                <div class="ui-item"><label id="l-fx">Победный FX</label>
+                    <select id="st-fx" onchange="liveStyle()">
+                        <option value="fireworks">💥 Салют</option><option value="confetti">🎉 Конфетти</option>
+                    </select>
+                </div>
+            </div>
+            <div class="ui-grid" style="margin-top:10px">
+                <div class="ui-item" style="flex-direction:row"><label id="l-qbg">Фон вопроса</label><input type="color" id="clr-q-bg" value="#0f172a" oninput="liveStyle()"></div>
+                <div class="ui-item" style="flex-direction:row"><label id="l-qbd">Рамка</label><input type="color" id="clr-q-bd" value="#ffffff" oninput="liveStyle()"></div>
+                <div class="ui-item" style="flex-direction:row"><label id="l-qtx">Текст вопроса</label><input type="color" id="clr-q-txt" value="#f59e0b" oninput="liveStyle()"></div>
+                <div class="ui-item" style="flex-direction:row"><label id="l-glw">Свечение</label><input type="color" id="clr-glow" value="#f59e0b" oninput="liveStyle()"></div>
+                <div class="ui-item" style="flex-direction:row"><label id="l-wbg">Окно победы</label><input type="color" id="clr-win-bg" value="#0f172a" oninput="liveStyle()"></div>
+                <div class="ui-item" style="flex-direction:row"><label id="l-atx">Текст ответов</label><input type="color" id="clr-ans-txt" value="#ffffff" oninput="liveStyle()"></div>
+            </div>
+            <div style="margin-top:10px;">
+                <label style="cursor:pointer; font-size:10px;"><input type="checkbox" id="st-chk-trans" onchange="liveStyle()"> <span id="l-transbg">ПРОЗРАЧНЫЙ ФОН</span></label>
+            </div>
+        </div>
+
+        <h2>🖼 ВИЗУАЛ</h2>
+        <div class="box">
+            <div class="ui-item"><label id="l-herogif">Герой ИГРА (GIF)</label><input type="text" id="inp-h" oninput="updateRabbit(this.value)"></div>
+            <div class="ui-item"><label id="l-herosize">Размер героя</label><input type="range" id="st-h-size" min="30" max="250" value="60" oninput="liveStyle()"></div>
+            <div class="ui-item"><label id="l-bgurl">Фон (JPG)</label><input type="text" id="inp-b" oninput="loadImg('b',this.value)"></div>
+        </div>
+
+        <h2>📝 ЗАДАНИЯ</h2>
+        <div class="box"><textarea id="bulk">Одиннадцать | 11 | 12
+Двенадцать | 12 | 20</textarea></div>
+
+        <h2>🎵 ЗВУКИ</h2>
+        <div class="box">
+            <div class="ui-grid">
+                <div class="ui-item"><label>Старт</label><input type="text" id="s-start" value="start_url" oninput="loadAudio('start',this.value)"></div>
+                <div class="ui-item"><label>Правильно</label><input type="text" id="s-ok" value="ok_url" oninput="loadAudio('ok',this.value)"></div>
+                <div class="ui-item"><label>Неправильно</label><input type="text" id="s-err" value="err_url" oninput="loadAudio('err',this.value)"></div>
+                <div class="ui-item"><label>Победа</label><input type="text" id="s-win" value="win_url" oninput="loadAudio('win',this.value)"></div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn btn-play" onclick="initGame()">ПРЕДПРОСМОТР 🚀</button>
+    <button class="btn btn-gen" onclick="generateGeniallyCode()">ГЕНЕРИРОВАТЬ КОД</button>
+    <button class="btn btn-copy" id="copy-btn" onclick="copyToClipboard()">СКОПИРОВАТЬ 📋</button>
+</div>
+
+<div id="game-area">
+    <div id="stage">
+        <canvas id="canvas" width="800" height="450"></canvas>
+        <div id="q-overlay"></div>
+        <img id="rabbit-gif" src="" alt="rabbit">
+        <div id="win-ui">
+            <h2 id="win-title">VICTORY!</h2>
+            <button class="btn" onclick="initGame()">RETRY</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ЛОГИКА (ВСТАВЬТЕ ВСЮ ВАШУ ЛОГИКУ НИЖЕ)
+const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), rabbitImg = document.getElementById('rabbit-gif'), winUI = document.getElementById('win-ui'), qOverlay = document.getElementById('q-overlay');
+let cfg = { lv: [], st: { font: 'Nunito', pW: 210, pH: 60, ansTxt: '#ffffff', hSize: 60, qBg: '#0f172a', qBd: '#ffffff', qTxt: '#f59e0b', winBg: '#0f172a', winBd: '#f59e0b', winTxt: '#f59e0b', btnBg: '#f59e0b', btnTxt: '#000000', useGlow: true, isTrans: false }, audios: {} };
+let game = { active: false, loopId: null, camY: 0, hero: {x: 400, y: 300, vy: 0}, platforms: [], won: false, feetOffset: 0 };
+const FINISH_MARKER = "__GAME_FINISHED__";
+
+function loadImg(k, u) { const i=new Image(); i.onload=()=>cfg[k+'Img']=i; i.src=u; }
+function loadAudio(k, u) { const a=new Audio(u); cfg.audios[k]=a; }
+
+function liveStyle() {
+    cfg.st.font = document.getElementById('st-font').value;
+    cfg.st.qBg = document.getElementById('clr-q-bg').value;
+    cfg.st.qBd = document.getElementById('clr-q-bd').value;
+    cfg.st.qTxt = document.getElementById('clr-q-txt').value;
+    cfg.st.ansTxt = document.getElementById('clr-ans-txt').value;
+    qOverlay.style.background = cfg.st.qBg; 
+    qOverlay.style.borderColor = cfg.st.qBd;
+    qOverlay.style.color = cfg.st.qTxt;
+    qOverlay.style.fontFamily = cfg.st.font;
+}
+
+function updateQ(text) { 
+    qOverlay.innerHTML = text; 
+    if (document.getElementById('lang-sel').value === 'math' && window.renderMathInElement) 
+        renderMathInElement(qOverlay, { delimiters: [{left: '$$', right: '$$', display: true}] }); 
+}
+
+function initGame() {
+    cfg.lv = document.getElementById('bulk').value.split('\n').filter(l=>l.includes('|')).map(l=>{ const p=l.split('|'); return {q:p[0].trim(), a:p[1].trim()}; });
+    game.active = true;
+    updateQ(cfg.lv[0].q);
+    qOverlay.style.display = 'flex';
+    render();
+}
+
+function render() {
+    ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,800,450);
+    ctx.fillStyle = cfg.st.ansTxt;
+    ctx.font = `bold 20px "${cfg.st.font}"`;
+    ctx.textAlign = 'center';
+    // Четкий текст с тенью вместо обводки
+    ctx.shadowColor = "rgba(0,0,0,1)";
+    ctx.shadowBlur = 4;
+    ctx.fillText("Текст ответа", 400, 225);
+    ctx.shadowBlur = 0;
+    requestAnimationFrame(render);
+}
+
+function generateGeniallyCode() {
+    const d = { 
+        h: document.getElementById('inp-h').value, 
+        b: document.getElementById('inp-b').value, 
+        lv: cfg.lv, 
+        st: cfg.st,
+        s_s: document.getElementById('s-start').value,
+        s_o: document.getElementById('s-ok').value,
+        s_e: document.getElementById('s-err').value,
+        s_w: document.getElementById('s-win').value,
+        mode: document.getElementById('lang-sel').value
+    };
+    const encoded = encodeURIComponent(btoa(JSON.stringify(d)));
+    const url = "https://vera422.github.io/edujump-lang/"; 
+    finalExport = '<iframe src="' + url + '?v=' + Date.now() + '&data=' + encoded + '" width="100%" height="100%" style="border:none;" allowfullscreen></iframe>';
+    document.getElementById('copy-btn').style.display = 'block';
+}
+
+function copyToClipboard() { navigator.clipboard.writeText(finalExport); alert("Код скопирован!"); }
+
+// Автозагрузка если открыто через ссылку
+if (window.location.search.includes('data=')) {
+    const d = JSON.parse(atob(new URLSearchParams(window.location.search).get('data')));
+    cfg.lv = d.lv; cfg.st = d.st;
+    // Загрузка звуков
+    loadAudio('start', d.s_s); loadAudio('ok', d.s_o); loadAudio('err', d.s_e); loadAudio('win', d.s_w);
+    setTimeout(initGame, 1000);
+}
+</script>
+</body>
+</html>
