@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <script>if (window.location.search.includes('data=')) { document.documentElement.classList.add('embed-mode'); }</script>
     <title>EduJump ПОПРЫГУНЧИК</title>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Nunito:wght@800&family=Open+Sans:wght@800&family=Roboto+Mono:wght@700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
     
     <style>
+        #editor { display: flex !important; }
         :root { --bg: #020617; --pn: #0f172a; --bd: #1e293b; --acc: #f59e0b; --txt: #f8fafc; --ok: #10b981; }
         body { margin: 0; font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--txt); height: 100vh; display: flex; overflow: hidden; }
         
-        /* Прячем редактор, если есть ?data= */
         .embed-mode #editor { display: none !important; }
+        .embed-mode body, .embed-mode #game-area { background: transparent !important; }
         
         #editor { width: 440px; background: var(--pn); border-right: 2px solid var(--bd); display: flex; flex-direction: column; padding: 15px; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         .scroll { flex: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 10px; }
@@ -30,11 +32,6 @@
         .btn-gen { background: var(--ok); color: #fff; margin-top: 10px; }
         .btn-copy { background: #3b82f6; color: #fff; margin-top: 10px; display: none; }
         #game-area { flex: 1; display: flex; justify-content: center; align-items: center; background: #000; position: relative; overflow: hidden; }
-        /* Убираем черный фон при встраивании в Genially */
-        .embed-mode body, 
-        .embed-mode #game-area { 
-        background: transparent !important; 
-        }
         #stage { position: relative; width: 800px; height: 450px; border-radius: 20px; overflow: hidden; background: #020617; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
         canvas { position: absolute; top: 0; left: 0; z-index: 1; touch-action: none; cursor: pointer; width: 800px; height: 450px; }
         #rabbit-gif { position: absolute; z-index: 10; pointer-events: none; transform-origin: center bottom; display: none; height: auto; }
@@ -172,17 +169,12 @@
 <script>
 const langs = {
     ru: { h_colors: "🎨 ЦВЕТА И FX", l_font: "Шрифт", l_fx: "Победный FX", l_qbg: "Фон вопроса", l_qbd: "Рамка вопроса", l_qtx: "Текст вопроса", l_glw: "Цвет Glow", l_wbg: "Окно победы", l_wtx: "Текст победы", l_rbg: "Фон Retry", l_rtx: "Текст Retry", l_atx: "Текст ответов", l_fbd: "Рамка финала", l_enableglow: "ВКЛЮЧИТЬ СИЯНИЕ", l_transbg: "ПРОЗРАЧНЫЙ ФОН", h_visual: "🖼 ВИЗУАЛ (URL И РАЗМЕРЫ)", l_herogif: "Герой ИГРА (GIF)", l_herosize: "Размер героя", l_winherogif: "Герой ПОБЕДА (GIF)", l_bgurl: "Фон ПУТИ (JPG)", l_platurl: "Платформа (PNG)", h_platset: "⚙️ НАСТРОЙКИ ПЛАТФОРМ", l_platw: "Ширина (W)", l_plath: "Высота (H)", l_para: "Параллакс %", l_land: "Приземление", l_shuf: "ПЕРЕМЕШИВАТЬ ВОПРОСЫ", h_tasks: "📝 ЗАДАНИЯ", h_sounds: "🎵 ЗВУКИ (URL)", h_gametxt: "🔤 ТЕКСТЫ", l_lstart: "Старт", l_lwin: "Победа", l_lretry: "Кнопка", btn_preview: "ЗАПУСТИТЬ ПРЕДПРОСМОТР 🚀", btn_gen: "ГЕНЕРИРОВАТЬ КОД", btn_copy: "СКОПИРОВАТЬ 📋", def_s: "СТАРТ", def_v: "ПОБЕДА!", def_r: "ЕЩЕ РАЗ", l_copy: "ИГРОВОЙ КВАРТАЛ. Все права защищены." },
-    en: { h_colors: "🎨 COLORS & FX", l_font: "Font", l_fx: "Victory FX", l_qbg: "Q-Box BG", l_qbd: "Q-Box Border", l_qtx: "Q-Box Text", l_glw: "Glow Color", l_wbg: "Win Box BG", l_wtx: "Win Text Color", l_rbg: "Retry BG", l_rtx: "Retry Text", l_atx: "Answers Text", l_fbd: "Final Border", l_enableglow: "ENABLE GLOW", l_transbg: "TRANSPARENT BG", h_visual: "🖼 VISUALS (URL & SIZE)", l_herogif: "Hero GAME (GIF)", l_herosize: "Hero Size", l_winherogif: "Hero WIN (GIF)", l_bgurl: "Path Background", l_platurl: "Platform PNG", h_platset: "⚙️ PLATFORM SETTINGS", l_platw: "Width (W)", l_plath: "Height (H)", l_para: "Parallax %", l_land: "Landing Offset", l_shuf: "SHUFFLE QUESTIONS", h_tasks: "📝 TASKS", h_sounds: "🎵 SOUNDS (URL)", h_gametxt: "🔤 GAME TEXTS", l_lstart: "Start", l_lwin: "Victory", l_lretry: "Button", btn_preview: "LAUNCH PREVIEW 🚀", btn_gen: "GENERATE CODE", btn_copy: "COPY TO CLIPBOARD 📋", def_s: "START", def_v: "VICTORY!", def_r: "RETRY", l_copy: "GAME QUARTER. All rights reserved." },
-    de: { h_colors: "🎨 FARBEN & FX", l_font: "Schriftart", l_fx: "Sieg FX", l_qbg: "Frage-Hintergrund", l_qbd: "Frage-Rahmen", l_qtx: "Frage-Text", l_glw: "Leuchtfarbe", l_wbg: "Sieg-Box HG", l_wtx: "Sieg-Text", l_rbg: "Retry HG", l_rtx: "Retry Text", l_atx: "Antwort-Text", l_fbd: "Finaler Rahmen", l_enableglow: "GLÜHEN AKTIVIEREN", l_transbg: "TRANSPARENTER HG", h_visual: "🖼 VISUALS (URL & GRÖSSE)", l_herogif: "Held SPIEL (GIF)", l_herosize: "Held Größe", l_winherogif: "Held SIEG (GIF)", l_bgurl: "Hintergrund URL", l_platurl: "Plattform PNG", h_platset: "⚙️ PLATTFORM SETTINGS", l_platw: "Breite (W)", l_plath: "Höhe (H)", l_para: "Parallaxe %", l_land: "Landung", l_shuf: "MISCHEN", h_tasks: "📝 AUFGABEN", h_sounds: "🎵 SOUNDS (URL)", h_gametxt: "🔤 TEXTE", l_lstart: "Start", l_lwin: "Sieg", l_lretry: "Retry", btn_preview: "VORSCHAU STARTEN 🚀", btn_gen: "CODE GENERIEREN", btn_copy: "KOPIEREN 📋", def_s: "START", def_v: "SIEG!", def_r: "NOCHMAL", l_copy: "SPIELQUARTIER. Alle Rechte vorbehalten." },
-    fr: { h_colors: "🎨 COULEURS & FX", l_font: "Police", l_fx: "Effet Victoire", l_qbg: "Fond Question", l_qbd: "Bordure Q", l_qtx: "Texte Question", l_glw: "Couleur Néon", l_wbg: "Fond Victoire", l_wtx: "Texte Victoire", l_rbg: "Fond Retry", l_rtx: "Texte Retry", l_atx: "Texte Réponses", l_fbd: "Bordure Finale", l_enableglow: "ACTIVER NÉON", l_transbg: "FOND TRANSPARENT", h_visual: "🖼 VISUELS (URL & TAILLE)", l_herogif: "Héros JEU (GIF)", l_herosize: "Taille Héros", l_winherogif: "Héros VICTOIRE (GIF)", l_bgurl: "URL Fond", l_platurl: "PNG Plateforme", h_platset: "⚙️ RÉGLAGES PLATEFORME", l_platw: "Largeur (W)", l_plath: "Hauteur (H)", l_para: "Parallaxe %", l_land: "Atterrissage", l_shuf: "MÉLANGER", h_tasks: "📝 TÂCHES", h_sounds: "🎵 SONS (URL)", h_gametxt: "🔤 TEXTES JEU", l_lstart: "Début", l_lwin: "Victoire", l_lretry: "Bouton", btn_preview: "APERÇU 🚀", btn_gen: "GÉNÉRER CODE", btn_copy: "COPIER 📋", def_s: "DÉPART", def_v: "VICTOIRE !", def_r: "REJOUER", l_copy: "QUARTIER JEU. Tous droits réservés." },
-    es: { h_colors: "🎨 COLORES Y FX", l_font: "Fuente", l_fx: "FX Victoria", l_qbg: "Fondo Pregunta", l_qbd: "Borde Q", l_qtx: "Texto Pregunta", l_glw: "Color Brillo", l_wbg: "Fondo Victoria", l_wtx: "Texto Victoria", l_rbg: "Fondo Retry", l_rtx: "Texto Retry", l_atx: "Texto Respuestas", l_fbd: "Borde Final", l_enableglow: "ACTIVAR BRILLO", l_transbg: "FONDO TRANSPARENTE", h_visual: "🖼 VISUAL (URL Y TAMAÑO)", l_herogif: "Héroe JUEGO (GIF)", l_herosize: "Tamaño Héroe", l_winherogif: "Héroe VICTORIA (GIF)", l_bgurl: "URL Fondo", l_platurl: "PNG Plataforma", h_platset: "⚙️ AJUSTES PLATAFORMA", l_platw: "Ancho (W)", l_plath: "Alto (H)", l_para: "Parallax %", l_land: "Aterrizaje", l_shuf: "MEZCLAR PREGUNTAS", h_tasks: "📝 TAREAS", h_sounds: "🎵 SONIDOS (URL)", h_gametxt: "🔤 TEXTOS", l_lstart: "Inicio", l_lwin: "Victoria", l_lretry: "Botón", btn_preview: "LANZAR VISTA PREVIA 🚀", btn_gen: "GENERAR CÓDIGO", btn_copy: "COPIAR 📋", def_s: "INICIO", def_v: "¡VICTORIA!", def_r: "REINTENTAR", l_copy: "BARRIO DE JUEGOS. Todos los derechos reservados." },
-    it: { h_colors: "🎨 COLORI E FX", l_font: "Carattere", l_fx: "FX Vittoria", l_qbg: "Sfondo Domanda", l_qbd: "Bordo Q", l_qtx: "Testo Domanda", l_glw: "Colore Glow", l_wbg: "Sfondo Vittoria", l_wtx: "Testo Vittoria", l_rbg: "Sfondo Retry", l_rtx: "Testo Retry", l_atx: "Testo Risposte", l_fbd: "Bordo Finale", l_enableglow: "ATTIVA GLOW", l_transbg: "SFONDO TRASPARENTE", h_visual: "🖼 VISUALE (URL E DIM.)", l_herogif: "Eroe GIOCO (GIF)", l_herosize: "Dim. Eroe", l_winherogif: "Eroe VITTORIA (GIF)", l_bgurl: "URL Sfondo", l_platurl: "PNG Piattaforma", h_platset: "⚙️ SETTING PIATTAFORMA", l_platw: "Larghezza (W)", l_plath: "Altezza (H)", l_para: "Parallasse %", l_land: "Atterraggio", l_shuf: "MESCOLA", h_tasks: "📝 DOMANDE", h_sounds: "🎵 SUONI (URL)", h_gametxt: "🔤 TESTI", l_lstart: "Inizio", l_lwin: "Vittoria", l_lretry: "Bottone", btn_preview: "AVVIA ANTEPRIMA 🚀", btn_gen: "GENERA CODICE", btn_copy: "COPIA 📋", def_s: "VIA", def_v: "VITTORIA!", def_r: "RIPROVA", l_copy: "QUARTIERE DEL GIOCO. Tutti i diritti riservati." },
-    zh: { h_colors: "🎨 颜色与效果", l_font: "字体", l_fx: "胜利特效", l_qbg: "问题背景", l_qbd: "问题边框", l_qtx: "问题文字", l_glw: "发光颜色", l_wbg: "胜利背景", l_wtx: "胜利文字", l_rbg: "重试背景", l_rtx: "重试文字", l_atx: "答案文字", l_fbd: "最后边框", l_enableglow: "开启发光", l_transbg: "透明背景", h_visual: "🖼 视觉与尺寸", l_herogif: "游戏角色 (GIF)", l_herosize: "角色尺寸", l_winherogif: "胜利角色 (GIF)", l_bgurl: "背景图片", l_platurl: "平台图片", h_platset: "⚙️ 平台设置", l_platw: "宽度 (W)", l_plath: "高度 (H)", l_para: "视差 %", l_land: "落地偏移", l_shuf: "打乱问题", h_tasks: "📝 任务", h_sounds: "🎵 声音 (URL)", h_gametxt: "🔤 文本设置", l_lstart: "开始", l_lwin: "获胜", l_lretry: "按钮", btn_preview: "预览游戏 🚀", btn_gen: "生成代码", btn_copy: "复制代码 📋", def_s: "开始", def_v: "获胜!", def_r: "重试", l_copy: "游戏区。保留所有权利。" }
+    en: { h_colors: "🎨 COLORS & FX", l_font: "Font", l_fx: "Victory FX", l_qbg: "Q-Box BG", l_qbd: "Q-Box Border", l_qtx: "Q-Box Text", l_glw: "Glow Color", l_wbg: "Win Box BG", l_wtx: "Win Text Color", l_rbg: "Retry BG", l_rtx: "Retry Text", l_atx: "Answers Text", l_fbd: "Final Border", l_enableglow: "ENABLE GLOW", l_transbg: "TRANSPARENT BG", h_visual: "🖼 VISUALS (URL & SIZE)", l_herogif: "Hero GAME (GIF)", l_herosize: "Hero Size", l_winherogif: "Hero WIN (GIF)", l_bgurl: "Path Background", l_platurl: "Platform PNG", h_platset: "⚙️ PLATFORM SETTINGS", l_platw: "Width (W)", l_plath: "Height (H)", l_para: "Parallax %", l_land: "Landing Offset", l_shuf: "SHUFFLE QUESTIONS", h_tasks: "📝 TASKS", h_sounds: "🎵 SOUNDS (URL)", h_gametxt: "🔤 GAME TEXTS", l_lstart: "Start", l_lwin: "Victory", l_lretry: "Button", btn_preview: "LAUNCH PREVIEW 🚀", btn_gen: "GENERATE CODE", btn_copy: "COPY TO CLIPBOARD 📋", def_s: "START", def_v: "VICTORY!", def_r: "RETRY", l_copy: "GAME QUARTER. All rights reserved." }
 };
 
 function switchLang() {
     const sel = document.getElementById('lang-sel').value;
-    const l = langs[sel];
+    const l = langs[sel] || langs['ru'];
     for (let id in l) { 
         const el = document.getElementById(id); 
         if(el) { 
@@ -212,22 +204,20 @@ const defaultSounds = {
     "err_url": "https://raw.githubusercontent.com/VeRa422/sounds_-_effects/refs/heads/main/7.mp3",
     "win_url": "https://raw.githubusercontent.com/VeRa422/sounds_-_effects/refs/heads/main/9.mp3"
 };
-
 function getRealUrl(url) { return defaultSounds[url] || url; }
+function loadAudio(key, url) { if(!url) return; const realUrl = getRealUrl(url); const a = new Audio(realUrl); a.volume = cfg.globalVol; cfg.audios[key] = a; }
 
-function loadAudio(key, url) { 
+/* ИСПРАВЛЕНИЕ: Ждем загрузки картинки героя, чтобы точно рассчитать его высоту */
+function updateRabbit(url) { 
     if(!url) return; 
-    const realUrl = getRealUrl(url); 
-    const a = new Audio(realUrl); 
-    a.volume = cfg.globalVol; 
-    cfg.audios[key] = a; 
+    rabbitImg.onload = () => { if(game.active && game.player.vy === 0) liveStyle(); };
+    rabbitImg.src = url; 
+    rabbitImg.style.display = 'block'; 
 }
-
-function updateRabbit(url) { if(!url) return; rabbitImg.src = url; rabbitImg.style.display = 'block'; }
 function updateWinRabbit(url) { if(!url) return; winRabbitImg.src = url; winRabbitImg.style.display = 'block'; }
 
 function liveStyle() {
-    game.feetOffset = parseInt(document.getElementById('inp-off').value);
+    game.feetOffset = parseInt(document.getElementById('inp-off').value) || 0;
     game.parallaxSpeed = parseInt(document.getElementById('inp-para').value) / 100;
     cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60 };
     
@@ -235,15 +225,16 @@ function liveStyle() {
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
     
     rabbitImg.style.width = cfg.st.hSize + 'px'; 
-    winRabbitImg.style.width = 'auto'; 
-    winRabbitImg.style.maxWidth = '250px'; 
-    
+    winRabbitImg.style.width = 'auto'; winRabbitImg.style.maxWidth = '250px'; 
     stage.style.background = cfg.st.isTrans ? 'transparent' : '#020617';
     winUI.style.background = hexToRgba(cfg.st.winBg, 0.7); winUI.style.border = `2px solid ${cfg.st.winBd}`;
     const rBtn = document.getElementById('retry-btn-ui'); rBtn.style.background = cfg.st.btnBg; rBtn.style.color = cfg.st.btnTxt; rBtn.innerText = document.getElementById('lbl-retry').value;
     const wTitle = document.getElementById('win-title'); wTitle.style.fontFamily = cfg.st.font; wTitle.style.color = cfg.st.winTxt; wTitle.innerText = document.getElementById('lbl-win').value;
     
-    if(game.active && game.player.vy === 0) { const hReal = rabbitImg.offsetHeight || cfg.st.hSize; game.player.y = game.player.lastPlatY - (cfg.st.pH/2) - (hReal/2) - game.feetOffset; }
+    if(game.active && game.player.vy === 0) { 
+        const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
+        game.player.y = game.player.lastPlatY - (cfg.st.pH/2) - (hReal/2) - game.feetOffset; 
+    }
 }
 
 function updateQ(text) { qOverlay.innerText = text; }
@@ -252,23 +243,17 @@ function initGame() {
     if(game.loopId) cancelAnimationFrame(game.loopId);
     liveStyle();
     
-    // Autoplay Policy Fix: Звуки грузятся только после клика по "Запустить" или внутри фрейма
-    loadAudio('start', document.getElementById('s-start').value);
-    loadAudio('ok', document.getElementById('s-ok').value);
-    loadAudio('err', document.getElementById('s-err').value);
-    loadAudio('win', document.getElementById('s-win').value);
+    loadAudio('start', document.getElementById('s-start').value); loadAudio('ok', document.getElementById('s-ok').value); loadAudio('err', document.getElementById('s-err').value); loadAudio('win', document.getElementById('s-win').value);
 
     cfg.lv = document.getElementById('bulk').value.split('\n').filter(l => l.includes('|')).map(line => { const p = line.split('|').map(x => x.trim()); return { q: p[0], a: p[1], w: p[2] }; });
     game.active = true; game.camY = 0; game.won = false; game.particles = []; winUI.style.display = 'none'; qOverlay.style.display = 'flex';
     rabbitImg.style.transform = 'rotate(0deg) scale(1)'; 
-    
     if(cfg.audios.start) cfg.audios.start.play().catch(()=>{});
     
     let wl = [...cfg.lv]; if (document.getElementById('shuffle-check').checked) { for (let i = wl.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [wl[i],wl[j]]=[wl[j],wl[i]]; } }
     game.currentQ = wl[0]?.q || ""; updateQ(game.currentQ);
     game.platforms = [{ x: 400, y: 400, w: cfg.st.pW * 1.4, h: cfg.st.pH, isOk: true, txt: document.getElementById('lbl-start').value, q: wl[0]?.q || "" }];
     
-    // Задержка увеличена до 400мс, чтобы браузер успел отрисовать и измерить картинку
     setTimeout(() => { 
         const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
         game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
@@ -281,17 +266,14 @@ function initGame() {
 function render() {
     if(!game.active) return;
     if(!game.won) {
-        const p = game.player; 
-        const hReal = rabbitImg.offsetHeight || cfg.st.hSize;
+        const p = game.player; const hReal = rabbitImg.offsetHeight || cfg.st.hSize;
         if (p.vy !== 0 || p.y < (p.lastPlatY - 100)) { p.vy += 0.8; p.y += p.vy; p.x += (p.targetX - p.x) * 0.12; }
         game.platforms.forEach(plat => { 
             const b = p.y + hReal/2 + game.feetOffset; 
             if(p.vy > 0 && Math.abs(p.x - plat.x) < (plat.w/2 + 20) && b > plat.y - cfg.st.pH/2 && b < plat.y + cfg.st.pH/2 + p.vy) {
                 if(plat.isOk){
-                    // Динамический пересчет высоты при приземлении
                     const currentHReal = rabbitImg.offsetHeight || cfg.st.hSize;
-                    p.lastPlatY=plat.y; 
-                    p.y=plat.y-cfg.st.pH/2-currentHReal/2-game.feetOffset;
+                    p.lastPlatY=plat.y; p.y=plat.y-cfg.st.pH/2-currentHReal/2-game.feetOffset;
                     if(p.vy>1&&plat.txt!==document.getElementById('lbl-start').value&&cfg.audios.ok){cfg.audios.ok.currentTime=0;cfg.audios.ok.play().catch(()=>{});} 
                     p.vy=0; p.x=plat.x; p.targetX=plat.x; 
                     if(plat.q===FINISH_MARKER) { qOverlay.style.display='none'; triggerWin(); } 
@@ -310,17 +292,8 @@ function draw() {
     else if(!cfg.st.isTrans) { ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,800,450); }
     ctx.save(); ctx.translate(0, game.camY);
     game.platforms.forEach(pl => { 
-        if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); 
-        else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
-        
-        // Исправление размытия текста векторной тенью вместо stroke
-        ctx.fillStyle = cfg.st.ansTxt; 
-        ctx.font = `bold 20px "${cfg.st.font}"`; 
-        ctx.textAlign = 'center'; 
-        ctx.shadowColor = "rgba(0,0,0,1)"; 
-        ctx.shadowBlur = 4;
-        ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + 7));
-        ctx.shadowBlur = 0; // Сбрасываем тень для других элементов
+        if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
+        ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold 20px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + 7)); ctx.shadowBlur = 0; 
     });
     game.particles.forEach(pt => { ctx.save(); if(cfg.st.useGlow){ctx.shadowBlur=10;ctx.shadowColor=pt.c;} ctx.fillStyle=pt.c; ctx.globalAlpha=pt.life; if(cfg.st.fx === 'hearts') { ctx.font = '18px serif'; ctx.fillText('❤️', pt.x, pt.y); } else if(cfg.st.fx === 'stars') { ctx.font = '18px serif'; ctx.fillText('⭐', pt.x, pt.y); } else { ctx.fillRect(pt.x, pt.y, pt.s, pt.s); } ctx.restore(); });
     const hR = rabbitImg.offsetHeight || cfg.st.hSize; rabbitImg.style.left = (game.player.x - cfg.st.hSize/2)+'px'; rabbitImg.style.top = (game.player.y - hR/2 + game.camY)+'px'; ctx.restore();
@@ -330,45 +303,27 @@ function triggerWin() { game.won = true; if(cfg.audios.win) { cfg.audios.win.cur
 
 stage.addEventListener('pointerdown', (e) => { if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -20; } }); });
 
-// Глобальный слушатель для разблокировки AudioContext
 window.addEventListener('pointerdown', () => {}, { once: true });
 
 let finalExport = "";
 function generateGeniallyCode() {
     liveStyle();
-    // Собираем все настройки в компактный объект
+    const baseUrl = 'https://vera422.github.io/edujump-lang/index.html';
+    
     const d = { 
-        h: document.getElementById('inp-h').value, 
-        hw: document.getElementById('inp-h-win').value, 
-        b: document.getElementById('inp-b').value, 
-        p: document.getElementById('inp-p').value, 
-        s_s: document.getElementById('s-start').value, 
-        s_o: document.getElementById('s-ok').value, 
-        s_e: document.getElementById('s-err').value, 
-        s_w: document.getElementById('s-win').value, 
+        h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
         l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value }, 
-        bulk: document.getElementById('bulk').value, 
-        st: cfg.st, 
-        para: game.parallaxSpeed, 
-        off: game.feetOffset, 
-        shuf: document.getElementById('shuffle-check').checked 
+        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked 
     };
     
-    // Получаем текущий URL редактора
-    const baseUrl = window.location.href.split('?')[0];
-    
-    // Безопасное кодирование с поддержкой кириллицы
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
     
-    // Генерируем iFrame вместо гигантского скрипта
-    // Разрешаем iframe тянуться на 100% и делаем его прозрачным
+    /* ИСПРАВЛЕНИЕ: Блок для Genially 100% растягивающийся */
     finalExport = `
     <div style="width:100%; height:100%; overflow:hidden; position:relative; background:transparent;">
         <iframe src="${baseUrl}?data=${dataStr}&v=${Date.now()}" 
                 style="width:100%; height:100%; border:none; position:absolute; top:0; left:0; background:transparent;" 
-                scrolling="no" 
-                allowtransparency="true"
-                allow="autoplay; fullscreen">
+                scrolling="no" allowtransparency="true" allow="autoplay; fullscreen">
         </iframe>
     </div>`;
     
@@ -383,7 +338,6 @@ function copyToClipboard() {
     document.body.removeChild(textArea);
 }
 
-// Функция для загрузки сохраненных настроек из URL (работает во фрейме)
 function initFromUrl() {
     const params = new URLSearchParams(window.location.search);
     if(params.has('data')) {
@@ -397,30 +351,15 @@ function initFromUrl() {
             if(d.s_o) document.getElementById('s-ok').value = d.s_o;
             if(d.s_e) document.getElementById('s-err').value = d.s_e;
             if(d.s_w) document.getElementById('s-win').value = d.s_w;
-            if(d.l) {
-                document.getElementById('lbl-start').value = d.l.s;
-                document.getElementById('lbl-win').value = d.l.w_t;
-                document.getElementById('lbl-retry').value = d.l.r;
-            }
+            if(d.l) { document.getElementById('lbl-start').value = d.l.s; document.getElementById('lbl-win').value = d.l.w_t; document.getElementById('lbl-retry').value = d.l.r; }
             if(d.bulk) document.getElementById('bulk').value = d.bulk;
             if(d.st) {
-                document.getElementById('st-font').value = d.st.font;
-                document.getElementById('st-fx').value = d.st.fx;
-                document.getElementById('clr-q-bg').value = d.st.qBg;
-                document.getElementById('clr-q-bd').value = d.st.qBd;
-                document.getElementById('clr-q-txt').value = d.st.qTxt;
-                document.getElementById('clr-glow').value = d.st.glow;
-                document.getElementById('clr-win-bg').value = d.st.winBg;
-                document.getElementById('clr-win-bd').value = d.st.winBd;
-                document.getElementById('clr-win-txt').value = d.st.winTxt;
-                document.getElementById('clr-btn-bg').value = d.st.btnBg;
-                document.getElementById('clr-btn-txt').value = d.st.btnTxt;
-                document.getElementById('clr-ans-txt').value = d.st.ansTxt;
-                document.getElementById('st-chk-glow').checked = d.st.useGlow;
-                document.getElementById('st-chk-trans').checked = d.st.isTrans;
-                document.getElementById('st-p-w').value = d.st.pW;
-                document.getElementById('st-p-h').value = d.st.pH;
-                document.getElementById('st-h-size').value = d.st.hSize;
+                document.getElementById('st-font').value = d.st.font; document.getElementById('st-fx').value = d.st.fx;
+                document.getElementById('clr-q-bg').value = d.st.qBg; document.getElementById('clr-q-bd').value = d.st.qBd; document.getElementById('clr-q-txt').value = d.st.qTxt;
+                document.getElementById('clr-glow').value = d.st.glow; document.getElementById('clr-win-bg').value = d.st.winBg; document.getElementById('clr-win-bd').value = d.st.winBd; document.getElementById('clr-win-txt').value = d.st.winTxt;
+                document.getElementById('clr-btn-bg').value = d.st.btnBg; document.getElementById('clr-btn-txt').value = d.st.btnTxt; document.getElementById('clr-ans-txt').value = d.st.ansTxt;
+                document.getElementById('st-chk-glow').checked = d.st.useGlow; document.getElementById('st-chk-trans').checked = d.st.isTrans;
+                document.getElementById('st-p-w').value = d.st.pW; document.getElementById('st-p-h').value = d.st.pH; document.getElementById('st-h-size').value = d.st.hSize;
             }
             if(d.para !== undefined) document.getElementById('inp-para').value = Math.round(d.para * 100);
             if(d.off !== undefined) document.getElementById('inp-off').value = d.off;
@@ -434,14 +373,32 @@ function initFromUrl() {
     }
 }
 
-// Инициализация при загрузке
 initFromUrl();
 liveStyle(); 
 switchLang();
 
-// Автозапуск игры, если она открыта внутри Genially (в embed-режиме)
+/* ИСПРАВЛЕНИЕ: Функция для растягивания игры в Genially на весь слайд */
+function scaleStage() {
+    if (!document.documentElement.classList.contains('embed-mode')) return;
+    const stage = document.getElementById('stage');
+    if (!stage) return;
+    
+    // Считаем масштаб так, чтобы игра заполнила весь фрейм без искажений
+    const scale = Math.min(window.innerWidth / 800, window.innerHeight / 450);
+    
+    // Центрируем и масштабируем
+    stage.style.position = 'absolute';
+    stage.style.left = '50%';
+    stage.style.top = '50%';
+    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+
 if (window.location.search.includes('data=')) {
-    setTimeout(initGame, 300);
+    window.addEventListener('resize', scaleStage);
+    setTimeout(() => {
+        initGame();
+        scaleStage(); // Вызываем масштабирование после старта
+    }, 300);
 }
 </script>
 </body>
