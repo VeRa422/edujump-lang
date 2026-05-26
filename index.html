@@ -207,7 +207,6 @@ const defaultSounds = {
 function getRealUrl(url) { return defaultSounds[url] || url; }
 function loadAudio(key, url) { if(!url) return; const realUrl = getRealUrl(url); const a = new Audio(realUrl); a.volume = cfg.globalVol; cfg.audios[key] = a; }
 
-/* ИСПРАВЛЕНИЕ: Ждем загрузки картинки героя, чтобы точно рассчитать его высоту */
 function updateRabbit(url) { 
     if(!url) return; 
     rabbitImg.onload = () => { if(game.active && game.player.vy === 0) liveStyle(); };
@@ -288,8 +287,18 @@ function render() {
 
 function draw() {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 800, 450);
-    if(cfg.bImg) { let s = 800 / cfg.bImg.width, sH = cfg.bImg.height * s, progress = Math.max(0, Math.min(1, game.camY / game.totalClimb)), bgOffset = (sH - 450) - (progress * (sH - 450) * game.parallaxSpeed); ctx.drawImage(cfg.bImg, 0, -bgOffset, 800, sH); }
-    else if(!cfg.st.isTrans) { ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,800,450); }
+    
+    // ИСПРАВЛЕНИЕ: Если прозрачный фон отключен, рисуем фон (картинку или цвет)
+    if (!cfg.st.isTrans) {
+        if(cfg.bImg) { 
+            let s = 800 / cfg.bImg.width, sH = cfg.bImg.height * s, progress = Math.max(0, Math.min(1, game.camY / game.totalClimb)), bgOffset = (sH - 450) - (progress * (sH - 450) * game.parallaxSpeed); 
+            ctx.drawImage(cfg.bImg, 0, -bgOffset, 800, sH); 
+        }
+        else { 
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(0,0,800,450); 
+        }
+    }
+    
     ctx.save(); ctx.translate(0, game.camY);
     game.platforms.forEach(pl => { 
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
@@ -318,7 +327,6 @@ function generateGeniallyCode() {
     
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
     
-    /* ИСПРАВЛЕНИЕ: Блок для Genially 100% растягивающийся */
     finalExport = `
     <div style="width:100%; height:100%; overflow:hidden; position:relative; background:transparent;">
         <iframe src="${baseUrl}?data=${dataStr}&v=${Date.now()}" 
@@ -377,16 +385,13 @@ initFromUrl();
 liveStyle(); 
 switchLang();
 
-/* ИСПРАВЛЕНИЕ: Функция для растягивания игры в Genially на весь слайд */
 function scaleStage() {
     if (!document.documentElement.classList.contains('embed-mode')) return;
     const stage = document.getElementById('stage');
     if (!stage) return;
     
-    // Считаем масштаб так, чтобы игра заполнила весь фрейм без искажений
     const scale = Math.min(window.innerWidth / 800, window.innerHeight / 450);
     
-    // Центрируем и масштабируем
     stage.style.position = 'absolute';
     stage.style.left = '50%';
     stage.style.top = '50%';
@@ -397,7 +402,7 @@ if (window.location.search.includes('data=')) {
     window.addEventListener('resize', scaleStage);
     setTimeout(() => {
         initGame();
-        scaleStage(); // Вызываем масштабирование после старта
+        scaleStage(); 
     }, 300);
 }
 </script>
