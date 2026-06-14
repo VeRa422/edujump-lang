@@ -258,10 +258,8 @@ function initGame() {
     game.currentQ = wl[0]?.q || ""; updateQ(game.currentQ);
     game.platforms = [{ x: 400, y: 400, w: cfg.st.pW * 1.4, h: cfg.st.pH, isOk: true, txt: document.getElementById('lbl-start').value, q: wl[0]?.q || "" }];
     
-    setTimeout(() => { 
-        const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
-        game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
-    }, 400);
+    const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
+    game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
     
     let cy = 400; wl.forEach((level, i) => { cy -= 220; let isL = Math.random() > 0.5; game.platforms.push({ x: 230, y: cy, w: cfg.st.pW, h: cfg.st.pH, isOk: isL, txt: isL ? level.a : level.w, q: wl[i+1]?.q || FINISH_MARKER }); game.platforms.push({ x: 570, y: cy, w: cfg.st.pW, h: cfg.st.pH, isOk: !isL, txt: !isL ? level.a : level.w, q: wl[i+1]?.q || FINISH_MARKER }); });
     game.totalClimb = 400 - cy; render();
@@ -294,7 +292,7 @@ function draw() {
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 800, 450);
     
     if (!cfg.st.isTrans) {
-        if(cfg.bImg) { 
+        if(cfg.bImg && cfg.bImg.width > 0) { 
             let s = 800 / cfg.bImg.width, sH = cfg.bImg.height * s, progress = Math.max(0, Math.min(1, game.camY / game.totalClimb)), bgOffset = (sH - 450) - (progress * (sH - 450) * game.parallaxSpeed); 
             ctx.drawImage(cfg.bImg, 0, -bgOffset, 800, sH); 
         }
@@ -325,7 +323,8 @@ function generateGeniallyCode() {
     
     const d = { 
         h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
-        l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value }, 
+        l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value },
+        langSel: document.getElementById('lang-sel').value, // <-- Запоминаем выбор языка
         bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked 
     };
     
@@ -355,6 +354,16 @@ function initFromUrl() {
     if(params.has('data')) {
         try {
             const d = JSON.parse(decodeURIComponent(atob(params.get('data'))));
+            
+            // Если в ссылке сохранен язык, применяем его ДО кастомных текстов
+            if(d.langSel) {
+                const selEl = document.getElementById('lang-sel');
+                if (selEl) {
+                    selEl.value = d.langSel;
+                    switchLang(); 
+                }
+            }
+
             if(d.h) document.getElementById('inp-h').value = d.h;
             if(d.hw) document.getElementById('inp-h-win').value = d.hw;
             if(d.b) document.getElementById('inp-b').value = d.b;
@@ -385,9 +394,9 @@ function initFromUrl() {
     }
 }
 
+switchLang();
 initFromUrl();
 liveStyle(); 
-switchLang();
 
 function scaleStage() {
     if (!document.documentElement.classList.contains('embed-mode')) return;
