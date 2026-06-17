@@ -42,6 +42,8 @@
         #creator-credit { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; }
         #creator-credit img { max-width: 140px; height: auto; margin-bottom: 10px; opacity: 0.8; }
         #q-overlay { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 500px; min-height: 60px; z-index: 50; display: none; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px; box-sizing: border-box; font-weight: bold; font-size: 24px; pointer-events: none; }
+        .lang-opt { padding: 6px 12px; font-size: 11px; color: #fff; cursor: pointer; white-space: nowrap; font-family: 'Nunito', sans-serif; }
+        .lang-opt:hover { background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -49,16 +51,24 @@
 <div id="editor">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; position:relative;">
         <h1 style="font-family:'Chakra Petch'; color:var(--acc); margin:0; font-size:1.4rem">ПОПРЫГУНЧИК</h1>
-        <select id="lang-sel" style="width: auto; padding: 2px; direction:ltr; text-align:right;" onchange="switchLang()">
-            <option value="ru">🇷🇺 RU</option>
-            <option value="en">🇺🇸 EN</option>
-            <option value="de">🇩🇪 DE</option>
-            <option value="fr">🇫🇷 FR</option>
-            <option value="es">🇪🇸 ES</option>
-            <option value="it">🇮🇹 IT</option>
-            <option value="zh">🇨🇳 ZH</option>
-            <option value="ko">🇰🇷 KO</option>
-        </select>
+        <div id="lang-sel-wrap" style="position:relative; display:inline-block;">
+            <button id="lang-btn" onclick="toggleLangMenu()" style="background:#020617; color:#fff; border:1px solid var(--bd); border-radius:4px; padding:4px 8px; cursor:pointer; font-size:11px; font-family:'Nunito',sans-serif;">🇷🇺 RU ▾</button>
+            <div id="lang-menu" style="display:none; position:absolute; top:100%; right:0; background:#0f172a; border:1px solid var(--bd); border-radius:6px; z-index:9999; min-width:100%; box-shadow:0 4px 12px rgba(0,0,0,0.5); overflow:hidden;">
+                <div class="lang-opt" data-val="ru" onclick="selectLang('ru','🇷🇺 RU')">🇷🇺 RU</div>
+                <div class="lang-opt" data-val="en" onclick="selectLang('en','🇺🇸 EN')">🇺🇸 EN</div>
+                <div class="lang-opt" data-val="de" onclick="selectLang('de','🇩🇪 DE')">🇩🇪 DE</div>
+                <div class="lang-opt" data-val="fr" onclick="selectLang('fr','🇫🇷 FR')">🇫🇷 FR</div>
+                <div class="lang-opt" data-val="es" onclick="selectLang('es','🇪🇸 ES')">🇪🇸 ES</div>
+                <div class="lang-opt" data-val="it" onclick="selectLang('it','🇮🇹 IT')">🇮🇹 IT</div>
+                <div class="lang-opt" data-val="zh" onclick="selectLang('zh','🇨🇳 ZH')">🇨🇳 ZH</div>
+                <div class="lang-opt" data-val="ko" onclick="selectLang('ko','🇰🇷 KO')">🇰🇷 KO</div>
+            </div>
+            <select id="lang-sel" style="display:none;" onchange="switchLang()">
+                <option value="ru">ru</option><option value="en">en</option><option value="de">de</option>
+                <option value="fr">fr</option><option value="es">es</option><option value="it">it</option>
+                <option value="zh">zh</option><option value="ko">ko</option>
+            </select>
+        </div>
     </div>
 
     <div class="scroll">
@@ -180,6 +190,22 @@ const langs = {
     zh: { h_colors: "🎨 颜色与效果", l_font: "字体", l_fx: "胜利特效", l_qbg: "问题背景", l_qbd: "问题边框", l_qtx: "问题文字", l_glw: "发光颜色", l_wbg: "胜利背景", l_wtx: "胜利文字", l_rbg: "重试背景", l_rtx: "重试文字", l_atx: "答案文字", l_fbd: "最后边框", l_enableglow: "开启发光", l_transbg: "透明背景", h_visual: "🖼 视觉与尺寸", l_herogif: "游戏角色 (GIF)", l_herosize: "角色尺寸", l_winherogif: "胜利角色 (GIF)", l_bgurl: "背景图片", l_platurl: "平台图片", h_platset: "⚙️ 平台设置", l_platw: "宽度 (W)", l_plath: "高度 (H)", l_para: "视差 %", l_land: "落地偏移", l_shuf: "打乱问题", h_tasks: "📝 任务", h_sounds: "🎵 声音 (URL)", h_gametxt: "🔤 文本设置", l_lstart: "开始", l_lwin: "获胜", l_lretry: "按钮", btn_preview: "预览游戏 🚀", btn_gen: "生成代码", btn_copy: "复制代码 📋", def_s: "开始", def_v: "获胜!", def_r: "重试", l_copy: "游戏区。保留所有权利。" },
     ko: { h_colors: "🎨 색상 및 효과", l_font: "폰트", l_fx: "승리 효과", l_qbg: "질문 배경", l_qbd: "질문 테두리", l_qtx: "질문 텍스트", l_glw: "글로우 색상", l_wbg: "승리 배경", l_wtx: "승리 텍스트", l_rbg: "재시도 배경", l_rtx: "재시도 텍스트", l_atx: "답변 텍스트", l_fbd: "최종 테두리", l_enableglow: "글로우 활성화", l_transbg: "투명 배경", h_visual: "🖼 비주얼 (URL 및 크기)", l_herogif: "캐릭터 게임 (GIF)", l_herosize: "캐릭터 크기", l_winherogif: "캐릭터 승리 (GIF)", l_bgurl: "배경 이미지 URL", l_platurl: "플랫폼 PNG", h_platset: "⚙️ 플랫폼 설정", l_platw: "너비 (W)", l_plath: "높이 (H)", l_para: "패럴랙스 %", l_land: "착지 오프셋", l_shuf: "질문 섞기", h_tasks: "📝 과제", h_sounds: "🎵 사운드 (URL)", h_gametxt: "🔤 게임 텍스트", l_lstart: "시작", l_lwin: "승리", l_lretry: "버튼", btn_preview: "미리보기 🚀", btn_gen: "코드 생성", btn_copy: "복사 📋", def_s: "시작", def_v: "승리!", def_r: "다시하기", l_copy: "게임 쿼터. 모든 권리 보유." }
 };
+
+function toggleLangMenu() {
+    const menu = document.getElementById('lang-menu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+function selectLang(val, label) {
+    document.getElementById('lang-sel').value = val;
+    document.getElementById('lang-btn').textContent = label + ' ▾';
+    document.getElementById('lang-menu').style.display = 'none';
+    switchLang();
+}
+document.addEventListener('click', function(e) {
+    if (!document.getElementById('lang-sel-wrap').contains(e.target)) {
+        document.getElementById('lang-menu').style.display = 'none';
+    }
+});
 
 function switchLang() {
     const sel = document.getElementById('lang-sel').value;
