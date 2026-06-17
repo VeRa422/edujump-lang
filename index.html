@@ -14,6 +14,8 @@
         
         .embed-mode #editor { display: none !important; }
         .embed-mode body, .embed-mode #game-area { background: transparent !important; }
+        #embed-credit { display: none; }
+        .embed-mode #embed-credit { display: flex !important; }
         
         #editor { width: 440px; background: var(--pn); border-right: 2px solid var(--bd); display: flex; flex-direction: column; padding: 15px; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         .scroll { flex: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 10px; }
@@ -57,6 +59,7 @@
             <option value="es">🇪🇸 ES</option>
             <option value="it">🇮🇹 IT</option>
             <option value="zh">🇨🇳 ZH</option>
+            <option value="ko">🇰🇷 KO</option>
         </select>
     </div>
 
@@ -73,7 +76,7 @@
                 <div class="ui-item"><label id="l-fx">Победный FX</label>
                     <select id="st-fx" onchange="liveStyle()">
                         <option value="fireworks">💥 Салют</option><option value="confetti">🎉 Конфетти</option>
-                        <option value="hearts">❤️ Сердечки</option><option value="stars">✨ Звезды</option>
+                        <option value="hearts">❤️ Сердечки</option><option value="stars">✨ З Звезды</option>
                     </select>
                 </div>
             </div>
@@ -158,6 +161,9 @@
         <div id="q-overlay"></div>
         <canvas id="canvas" width="800" height="450"></canvas>
         <img id="rabbit-gif" src="" alt="rabbit">
+        <div id="embed-credit" style="position:absolute; bottom:10px; right:10px; z-index:50; flex-direction:column; align-items:center; pointer-events:none;">
+            <img src="https://raw.githubusercontent.com/VeRa422/sounds_-_effects/main/logo.png" alt="logo" style="max-width:90px; height:auto; opacity:0.8;">
+        </div>
         <div id="win-ui">
             <img id="win-rabbit-gif" src="" alt="win-rabbit">
             <h2 id="win-title">VICTORY!</h2>
@@ -174,7 +180,8 @@ const langs = {
     fr: { h_colors: "🎨 COULEURS & FX", l_font: "Police", l_fx: "Effet Victoire", l_qbg: "Fond Question", l_qbd: "Bordure Q", l_qtx: "Texte Question", l_glw: "Couleur Néon", l_wbg: "Fond Victoire", l_wtx: "Texte Victoire", l_rbg: "Fond Retry", l_rtx: "Texte Retry", l_atx: "Texte Réponses", l_fbd: "Bordure Finale", l_enableglow: "ACTIVER NÉON", l_transbg: "FOND TRANSPARENT", h_visual: "🖼 VISUELS (URL & TAILLE)", l_herogif: "Héros JEU (GIF)", l_herosize: "Taille Héros", l_winherogif: "Héros VICTOIRE (GIF)", l_bgurl: "URL Fond", l_platurl: "PNG Plateforme", h_platset: "⚙️ RÉGLAGES PLATEFORME", l_platw: "Largeur (W)", l_plath: "Hauteur (H)", l_para: "Parallaxe %", l_land: "Atterrissage", l_shuf: "MÉLANGER", h_tasks: "📝 TÂCHES", h_sounds: "🎵 SONS (URL)", h_gametxt: "🔤 TEXTES JEU", l_lstart: "Début", l_lwin: "Victoire", l_lretry: "Bouton", btn_preview: "APERÇU 🚀", btn_gen: "GÉNÉRER CODE", btn_copy: "COPIER 📋", def_s: "DÉPART", def_v: "VICTOIRE !", def_r: "REJOUER", l_copy: "QUARTIER JEU. Tous droits réservés." },
     es: { h_colors: "🎨 COLORES Y FX", l_font: "Fuente", l_fx: "FX Victoria", l_qbg: "Fondo Pregunta", l_qbd: "Borde Q", l_qtx: "Texto Pregunta", l_glw: "Color Brillo", l_wbg: "Fondo Victoria", l_wtx: "Texto Victoria", l_rbg: "Fondo Retry", l_rtx: "Texto Retry", l_atx: "Texto Respuestas", l_fbd: "Borde Final", l_enableglow: "ACTIVAR BRILLO", l_transbg: "FONDO TRANSPARENTE", h_visual: "🖼 VISUAL (URL Y TAMAÑO)", l_herogif: "Héroe JUEGO (GIF)", l_herosize: "Tamaño Héroe", l_winherogif: "Héroe VICTORIA (GIF)", l_bgurl: "URL Fondo", l_platurl: "PNG Plataforma", h_platset: "⚙️ AJUSTES PLATAFORMA", l_platw: "Ancho (W)", l_plath: "Alto (H)", l_para: "Parallax %", l_land: "Aterrizaje", l_shuf: "MEZCLAR PREGUNTAS", h_tasks: "📝 TAREAS", h_sounds: "🎵 SONIDOS (URL)", h_gametxt: "🔤 TEXTOS", l_lstart: "Inicio", l_lwin: "Victoria", l_lretry: "Botón", btn_preview: "LANZAR VISTA PREVIA 🚀", btn_gen: "GENERAR CÓDIGO", btn_copy: "COPIAR 📋", def_s: "INICIO", def_v: "¡VICTORIA!", def_r: "REINTENTAR", l_copy: "BARRIO DE JUEGOS. Todos los derechos reservados." },
     it: { h_colors: "🎨 COLORI E FX", l_font: "Carattere", l_fx: "FX Vittoria", l_qbg: "Sfondo Domanda", l_qbd: "Bordo Q", l_qtx: "Testo Domanda", l_glw: "Colore Glow", l_wbg: "Sfondo Vittoria", l_wtx: "Testo Vittoria", l_rbg: "Sfondo Retry", l_rtx: "Testo Retry", l_atx: "Testo Risposte", l_fbd: "Bordo Finale", l_enableglow: "ATTIVA GLOW", l_transbg: "SFONDO TRASPARENTE", h_visual: "🖼 VISUALE (URL E DIM.)", l_herogif: "Eroe GIOCO (GIF)", l_herosize: "Dim. Eroe", l_winherogif: "Eroe VITTORIA (GIF)", l_bgurl: "URL Sfondo", l_platurl: "PNG Piattaforma", h_platset: "⚙️ SETTING PIATTAFORMA", l_platw: "Larghezza (W)", l_plath: "Altezza (H)", l_para: "Parallasse %", l_land: "Atterraggio", l_shuf: "MESCOLA", h_tasks: "📝 DOMANDE", h_sounds: "🎵 SUONI (URL)", h_gametxt: "🔤 TESTI", l_lstart: "Inizio", l_lwin: "Vittoria", l_lretry: "Bottone", btn_preview: "AVVIA ANTEPRIMA 🚀", btn_gen: "GENERA CODICE", btn_copy: "COPIA 📋", def_s: "VIA", def_v: "VITTORIA!", def_r: "RIPROVA", l_copy: "QUARTIERE DEL GIOCO. Tutti i diritti riservati." },
-    zh: { h_colors: "🎨 颜色与效果", l_font: "字体", l_fx: "胜利特效", l_qbg: "问题背景", l_qbd: "问题边框", l_qtx: "问题文字", l_glw: "发光颜色", l_wbg: "胜利背景", l_wtx: "胜利文字", l_rbg: "重试背景", l_rtx: "重试文字", l_atx: "答案文字", l_fbd: "最后边框", l_enableglow: "开启发光", l_transbg: "透明背景", h_visual: "🖼 视觉与尺寸", l_herogif: "游戏角色 (GIF)", l_herosize: "角色尺寸", l_winherogif: "胜利角色 (GIF)", l_bgurl: "背景图片", l_platurl: "平台图片", h_platset: "⚙️ 平台设置", l_platw: "宽度 (W)", l_plath: "高度 (H)", l_para: "视差 %", l_land: "落地偏移", l_shuf: "打乱问题", h_tasks: "📝 任务", h_sounds: "🎵 声音 (URL)", h_gametxt: "🔤 文本设置", l_lstart: "开始", l_lwin: "获胜", l_lretry: "按钮", btn_preview: "预览游戏 🚀", btn_gen: "生成代码", btn_copy: "复制代码 📋", def_s: "开始", def_v: "获胜!", def_r: "重试", l_copy: "游戏区。保留所有权利。" }
+    zh: { h_colors: "🎨 颜色与效果", l_font: "字体", l_fx: "胜利特效", l_qbg: "问题背景", l_qbd: "问题边框", l_qtx: "问题文字", l_glw: "发光颜色", l_wbg: "胜利背景", l_wtx: "胜利文字", l_rbg: "重试背景", l_rtx: "重试文字", l_atx: "答案文字", l_fbd: "最后边框", l_enableglow: "开启发光", l_transbg: "透明背景", h_visual: "🖼 视觉与尺寸", l_herogif: "游戏角色 (GIF)", l_herosize: "角色尺寸", l_winherogif: "胜利角色 (GIF)", l_bgurl: "背景图片", l_platurl: "平台图片", h_platset: "⚙️ 平台设置", l_platw: "宽度 (W)", l_plath: "高度 (H)", l_para: "视差 %", l_land: "落地偏移", l_shuf: "打乱问题", h_tasks: "📝 任务", h_sounds: "🎵 声音 (URL)", h_gametxt: "🔤 文本设置", l_lstart: "开始", l_lwin: "获胜", l_lretry: "按钮", btn_preview: "预览游戏 🚀", btn_gen: "生成代码", btn_copy: "复制代码 📋", def_s: "开始", def_v: "获胜!", def_r: "重试", l_copy: "游戏区。保留所有权利。" },
+    ko: { h_colors: "🎨 색상 및 효과", l_font: "폰트", l_fx: "승리 효과", l_qbg: "질문 배경", l_qbd: "질문 테두리", l_qtx: "질문 텍스트", l_glw: "글로우 색상", l_wbg: "승리 배경", l_wtx: "승리 텍스트", l_rbg: "재시도 배경", l_rtx: "재시도 텍스트", l_atx: "답변 텍스트", l_fbd: "최종 테두리", l_enableglow: "글로우 활성화", l_transbg: "투명 배경", h_visual: "🖼 비주얼 (URL 및 크기)", l_herogif: "캐릭터 게임 (GIF)", l_herosize: "캐릭터 크기", l_winherogif: "캐릭터 승리 (GIF)", l_bgurl: "배경 이미지 URL", l_platurl: "플랫폼 PNG", h_platset: "⚙️ 플랫폼 설정", l_platw: "너비 (W)", l_plath: "높이 (H)", l_para: "패럴랙스 %", l_land: "착지 오프셋", l_shuf: "질문 섞기", h_tasks: "📝 과제", h_sounds: "🎵 사운드 (URL)", h_gametxt: "🔤 게임 텍스트", l_lstart: "시작", l_lwin: "승리", l_lretry: "버튼", btn_preview: "미리보기 🚀", btn_gen: "코드 생성", btn_copy: "복사 📋", def_s: "시작", def_v: "승리!", def_r: "다시하기", l_copy: "게임 쿼터. 모든 권리 보유." }
 };
 
 function switchLang() {
@@ -323,8 +330,7 @@ function generateGeniallyCode() {
     
     const d = { 
         h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
-        l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value },
-        langSel: document.getElementById('lang-sel').value, // <-- Запоминаем выбор языка
+        l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value }, 
         bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked 
     };
     
@@ -354,16 +360,6 @@ function initFromUrl() {
     if(params.has('data')) {
         try {
             const d = JSON.parse(decodeURIComponent(atob(params.get('data'))));
-            
-            // Если в ссылке сохранен язык, применяем его ДО кастомных текстов
-            if(d.langSel) {
-                const selEl = document.getElementById('lang-sel');
-                if (selEl) {
-                    selEl.value = d.langSel;
-                    switchLang(); 
-                }
-            }
-
             if(d.h) document.getElementById('inp-h').value = d.h;
             if(d.hw) document.getElementById('inp-h-win').value = d.hw;
             if(d.b) document.getElementById('inp-b').value = d.b;
