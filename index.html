@@ -47,9 +47,9 @@
 <body>
 
 <div id="editor">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; position:relative;">
         <h1 style="font-family:'Chakra Petch'; color:var(--acc); margin:0; font-size:1.4rem">ПОПРЫГУНЧИК</h1>
-        <select id="lang-sel" style="width: auto; padding: 2px;" onchange="switchLang()">
+        <select id="lang-sel" style="width: auto; padding: 2px; direction:ltr; text-align:right;" onchange="switchLang()">
             <option value="ru">🇷🇺 RU</option>
             <option value="en">🇺🇸 EN</option>
             <option value="de">🇩🇪 DE</option>
@@ -141,7 +141,7 @@
         </div></div>
 
         <div id="creator-credit">
-            <img src="https://raw.githubusercontent.com/VeRa422/sounds_-_effects/main/logo.png" alt="logo">
+            <img src="https://raw.githubusercontent.com/VeRa422/sounds_-_effects/main/logo.png" alt="logo" crossorigin="anonymous" onerror="this.style.display='none'">
             <div style="font-family:'Chakra Petch';" id="l-copy">ИГРОВОЙ КВАРТАЛ. Все права защищены.</div>
         </div>
     </div>
