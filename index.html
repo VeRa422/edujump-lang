@@ -339,24 +339,34 @@ function initGame() {
     game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
     
     // Gap between platforms: base 220px + extra space if images are large (so they don't hide under q-overlay)
-    // Position q-overlay: its bottom must be above the top of images on platforms
-    // Image top in screen coords at first platform = platY - imgSize/2 + imgOff + camY(=0 at start)
-    // We set q-overlay top so its bottom = platY - imgSize/2 + imgOff - 10px gap
-    // platGap determines platY = 400 - platGap
     const imgSize = cfg.st.imgSize || 0;
     const imgOff = cfg.st.imgOff || 0;
-    const platGap = 220 + Math.max(0, imgSize - 20);
-    const firstPlatY = 400 - platGap;
-    // top of image on first platform (screen coords, camY=0 at start)
-    const imgTopOnScreen = firstPlatY - imgSize/2 + imgOff;
-    // q-overlay bottom = imgTopOnScreen - 10
-    // q-overlay top = q-overlay bottom - q-overlay height
     const qH = qOverlay.offsetHeight || 70;
-    const qTop = Math.max(5, imgTopOnScreen - qH - 10);
+    const qTop = 8;
     qOverlay.style.top = qTop + 'px';
+    const qBottom = qTop + qH; // bottom edge of q-overlay in screen px
+
+    // Camera keeps player at y=300 screen. A platform at world y=PY appears at screen y = PY + camY.
+    // At steady state camY ≈ 300 - playerY ≈ 300 - platY (player sits on platform).
+    // So platform screen Y ≈ 300 (centre). Image top screen Y ≈ 300 - imgSize/2 + imgOff.
+    // We need: 300 - imgSize/2 + imgOff > qBottom
+    // => platGap doesn't help here — we need to shift platforms DOWN relative to camera.
+    // The gap between platforms in world coords must ensure that when the platform
+    // is at screen centre (y≈300), the image top is below qBottom.
+    // If imgTop at screen centre = 300 - imgSize/2 + imgOff < qBottom, we push platY down:
+    // Extra world offset needed = qBottom - (300 - imgSize/2 + imgOff) + 20
+    const imgTopAtCentre = 300 - imgSize / 2 + imgOff;
+    const extraOffset = imgTopAtCentre < qBottom ? (qBottom - imgTopAtCentre + 20) : 0;
+    const platGap = 220 + Math.max(0, imgSize - 20);
 
     let cy = 400; wl.forEach((level, i) => { 
         cy -= platGap;
+        // Push each platform down so its image clears q-overlay when camera centres on it
+        const worldPlatY = cy;
+        const imgTopScreenWhenCentred = worldPlatY - imgSize/2 + imgOff + (300 - worldPlatY);
+        if (imgTopScreenWhenCentred < qBottom + 10) {
+            cy = cy - (qBottom + 10 - imgTopScreenWhenCentred);
+        }
         let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
     game.totalClimb = 400 - cy; render();
 }
