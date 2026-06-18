@@ -408,8 +408,10 @@ function triggerWin() { game.won = true; if(cfg.audios.win) { cfg.audios.win.cur
 
 stage.addEventListener('pointerdown', (e) => {
     if(!game.active || game.player.vy !== 0 || game.won) return;
-    const r = stage.getBoundingClientRect(), s = r.width/800;
-    const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY;
+    const r = stage.getBoundingClientRect();
+    const sx = r.width / 800, sy = r.height / 450;
+    const mx = (e.clientX - r.left) / sx;
+    const my = (e.clientY - r.top) / sy - game.camY;
     game.platforms.forEach(pl => {
         if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) {
             game.player.targetX = pl.x;
