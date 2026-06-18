@@ -511,8 +511,15 @@ if (window.location.search.includes('data=')) {
     window.addEventListener('resize', scaleStage);
     setTimeout(() => {
         initGame();
-        scaleStage(); 
+        scaleStage();
     }, 300);
+    // Reload audio on first user interaction to bypass autoplay policy in iframe
+    document.addEventListener('pointerdown', function _audioUnlock() {
+        loadAudio('ok', document.getElementById('s-ok').value);
+        loadAudio('err', document.getElementById('s-err').value);
+        loadAudio('win', document.getElementById('s-win').value);
+        document.removeEventListener('pointerdown', _audioUnlock);
+    }, { once: true });
 }
 </script>
 </body>
