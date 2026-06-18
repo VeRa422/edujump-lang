@@ -146,10 +146,10 @@
         <h2 id="h-sounds">🎵 ЗВУКИ (URL)</h2>
         <div class="box">
             <div class="ui-grid">
-                <div class="ui-item"><label>Старт</label><input type="text" id="s-start" value="start_url"></div>
-                <div class="ui-item"><label>Правильно</label><input type="text" id="s-ok" value="ok_url"></div>
-                <div class="ui-item"><label>Неправильно</label><input type="text" id="s-err" value="err_url"></div>
-                <div class="ui-item"><label>Победа</label><input type="text" id="s-win" value="win_url"></div>
+                <div class="ui-item"><label>Старт</label><input type="text" id="s-start" value="start_url" oninput="loadAudio('start',this.value)"></div>
+                <div class="ui-item"><label>Правильно</label><input type="text" id="s-ok" value="ok_url" oninput="loadAudio('ok',this.value)"></div>
+                <div class="ui-item"><label>Неправильно</label><input type="text" id="s-err" value="err_url" oninput="loadAudio('err',this.value)"></div>
+                <div class="ui-item"><label>Победа</label><input type="text" id="s-win" value="win_url" oninput="loadAudio('win',this.value)"></div>
             </div>
         </div>
 
@@ -263,7 +263,7 @@ function updateWinRabbit(url) { if(!url) return; winRabbitImg.src = url; winRabb
 function liveStyle() {
     game.feetOffset = parseInt(document.getElementById('inp-off').value) || 0;
     game.parallaxSpeed = parseInt(document.getElementById('inp-para').value) / 100;
-    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7, imgOff: parseInt(document.getElementById('inp-img-off').value) ?? -8, imgSize: parseInt(document.getElementById('inp-img-size').value) || 40 };
+    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7, imgOff: parseInt(document.getElementById('inp-img-off').value) || -8, imgSize: parseInt(document.getElementById('inp-img-size').value) || 40 };
     
     qOverlay.style.background = cfg.st.qBg; qOverlay.style.borderColor = cfg.st.qBd; qOverlay.style.color = cfg.st.qTxt; qOverlay.style.fontFamily = cfg.st.font;
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
@@ -345,29 +345,8 @@ function initGame() {
 function render() {
     if(!game.active) return;
 
-    // Dynamically position q-overlay: place it just above the highest platform image, with gap
-    try {
-        const imgSize = cfg.st.imgSize || 0;
-        const imgOff = cfg.st.imgOff || 0;
-        const pH = cfg.st.pH || 60;
-        let minImgTop = Infinity;
-        game.platforms.forEach(pl => {
-            if (!pl.platImg || !pl.platImg.complete || pl.platImg.naturalWidth === 0) return;
-            const platTopInCanvas = pl.y - pH/2 + game.camY;
-            if (platTopInCanvas > 420 || platTopInCanvas < -imgSize*3) return;
-            const imgTopInCanvas = (pl.y + imgOff) - imgSize/2 + game.camY;
-            if (imgTopInCanvas < minImgTop) minImgTop = imgTopInCanvas;
-        });
-        if (minImgTop === Infinity) {
-            // No images - overlay at top
-            qOverlay.style.top = '8px';
-        } else {
-            // Place overlay so its BOTTOM is at least 12px above the highest image top
-            const overlayH = qOverlay.offsetHeight || 60;
-            const overlayTop = Math.max(8, minImgTop - overlayH - 12);
-            qOverlay.style.top = overlayTop + 'px';
-        }
-    } catch(e) { qOverlay.style.top = '8px'; }
+    // q-overlay is always fixed at top
+    qOverlay.style.top = '8px';
 
     if(!game.won) {
         const p = game.player; const hReal = rabbitImg.offsetHeight || cfg.st.hSize;
@@ -491,6 +470,10 @@ function initFromUrl() {
             updateWinRabbit(document.getElementById('inp-h-win').value);
             loadImg('b', document.getElementById('inp-b').value);
             loadImg('p', document.getElementById('inp-p').value);
+            loadAudio('start', document.getElementById('s-start').value);
+            loadAudio('ok', document.getElementById('s-ok').value);
+            loadAudio('err', document.getElementById('s-err').value);
+            loadAudio('win', document.getElementById('s-win').value);
         } catch(e) { console.error("URL parse error", e); }
     }
 }
