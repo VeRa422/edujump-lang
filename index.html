@@ -466,6 +466,10 @@ function initFromUrl() {
                 document.getElementById('st-p-w').value = d.st.pW; document.getElementById('st-p-h').value = d.st.pH; document.getElementById('st-h-size').value = d.st.hSize;
                 if(d.st.ansSize !== undefined) document.getElementById('inp-ans-size').value = d.st.ansSize;
                 if(d.st.ansOff !== undefined) document.getElementById('inp-ans-off').value = d.st.ansOff;
+                if(d.st.imgOff !== undefined) document.getElementById('inp-img-off').value = d.st.imgOff;
+                if(d.st.imgSize !== undefined) document.getElementById('inp-img-size').value = d.st.imgSize;
+                if(d.st.imgX !== undefined) document.getElementById('inp-img-x').value = d.st.imgX;
+                if(d.st.heroX !== undefined) document.getElementById('inp-hero-x').value = d.st.heroX;
             }
             if(d.para !== undefined) document.getElementById('inp-para').value = Math.round(d.para * 100);
             if(d.off !== undefined) document.getElementById('inp-off').value = d.off;
