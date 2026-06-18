@@ -410,22 +410,13 @@ stage.addEventListener('pointerdown', (e) => {
     if(!game.active || game.player.vy !== 0 || game.won) return;
     const r = stage.getBoundingClientRect(), s = r.width/800;
     const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY;
-    // Find the NEAREST platform above the player in the clicked column (left/right half)
-    const clickedLeft = (e.clientX - r.left) / r.width < 0.5;
-    let nearest = null;
-    let nearestDist = Infinity;
     game.platforms.forEach(pl => {
-        if (pl.y >= game.player.y) return; // must be above player
-        const plLeft = pl.x < 400;
-        if (pl === game.platforms[0]) return; // skip start platform
-        const dist = game.player.y - pl.y;
-        if (dist < nearestDist) { nearestDist = dist; nearest = pl; }
+        if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) {
+            game.player.targetX = pl.x;
+            const gap = parseInt(document.getElementById('inp-plat-gap').value) || 220;
+            game.player.vy = -Math.ceil(Math.sqrt(1.6 * gap) * 1.1);
+        }
     });
-    if (nearest) {
-        game.player.targetX = nearest.x;
-        const gap = parseInt(document.getElementById('inp-plat-gap').value) || 220;
-        game.player.vy = -Math.ceil(Math.sqrt(1.6 * gap) * 1.1);
-    }
 });
 
 window.addEventListener('pointerdown', () => {}, { once: true });
