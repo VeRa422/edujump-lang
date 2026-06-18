@@ -325,6 +325,7 @@ function makePlat(x, cy, w, h, isOk, txt, q) {
 
 function initGame() {
     if(game.loopId) cancelAnimationFrame(game.loopId);
+    _startSoundPlayed = false;
     liveStyle();
     
     loadAudio('start', document.getElementById('s-start').value); loadAudio('ok', document.getElementById('s-ok').value); loadAudio('err', document.getElementById('s-err').value); loadAudio('win', document.getElementById('s-win').value);
@@ -342,7 +343,7 @@ function initGame() {
     cfg.lv = joinedBulk.split('\n').filter(l => l.includes('|')).map(line => { const p = line.split('|').map(x => x.trim()); return { q: p[0], a: p[1], w: p[2] }; });
     game.active = true; game.camY = 0; game.won = false; game.particles = []; winUI.style.display = 'none'; qOverlay.style.display = 'flex';
     rabbitImg.style.transform = 'rotate(0deg) scale(1)'; 
-    if(cfg.audios.start && document.documentElement.classList.contains('embed-mode')) cfg.audios.start.play().catch(()=>{});
+    // Start sound plays on first user tap (autoplay policy)
     
     let wl = [...cfg.lv]; if (document.getElementById('shuffle-check').checked) { for (let i = wl.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [wl[i],wl[j]]=[wl[j],wl[i]]; } }
     game.currentQ = wl[0]?.q || ""; updateQ(game.currentQ);
@@ -427,7 +428,8 @@ function draw() {
 
 function triggerWin() { game.won = true; if(cfg.audios.win) { cfg.audios.win.currentTime=0; cfg.audios.win.play().catch(()=>{}); } const fx = cfg.st.fx; for(let i=0; i<80; i++) game.particles.push({ x: game.player.x, y: game.player.y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, c: fx==='fireworks'||fx==='confetti' ? `hsl(${Math.random()*360},70%,60%)` : cfg.st.glow, s: Math.random()*6+2, life: 1 }); winUI.style.display = 'flex'; }
 
-stage.addEventListener('pointerdown', (e) => { if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -Math.ceil(Math.sqrt(1.6 * (parseInt(document.getElementById('inp-plat-gap').value) || 220)) * 1.1); } }); });
+let _startSoundPlayed = false;
+stage.addEventListener('pointerdown', (e) => { if(!_startSoundPlayed && cfg.audios.start){ cfg.audios.start.play().catch(()=>{}); _startSoundPlayed=true; } if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -Math.ceil(Math.sqrt(1.6 * (parseInt(document.getElementById('inp-plat-gap').value) || 220)) * 1.1); } }); });
 
 window.addEventListener('pointerdown', () => {}, { once: true });
 
