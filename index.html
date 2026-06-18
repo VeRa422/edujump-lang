@@ -123,12 +123,12 @@
                 <div class="ui-item"><label id="l-plath">Высота (H)</label><input type="number" id="st-p-h" value="60" oninput="liveStyle()"></div>
                 <div class="ui-item"><label id="l-para">Параллакс %</label><input type="range" id="inp-para" min="0" max="100" value="100" oninput="liveStyle()"></div>
                 <div class="ui-item"><label id="l-land">Приземление</label><input type="range" id="inp-off" min="-150" max="150" value="0" oninput="liveStyle()"></div>
-                <div class="ui-item"><label id="l-anstxtsz">Размер текста ответов</label><input type="range" id="inp-ans-size" min="8" max="48" value="20" oninput="liveStyle(); if(game.active) initGame();"></div>
-                <div class="ui-item"><label id="l-anstxtoff">Положение текста (↑↓)</label><input type="range" id="inp-ans-off" min="-60" max="60" value="7" oninput="liveStyle(); if(game.active) initGame();"></div>
-                <div class="ui-item"><label>Положение картинки (↑↓)</label><input type="range" id="inp-img-off" min="-60" max="60" value="-8" oninput="liveStyle(); if(game.active) initGame();"></div>
-                <div class="ui-item"><label>Размер картинки на платформе</label><input type="range" id="inp-img-size" min="10" max="120" value="40" oninput="liveStyle(); if(game.active) initGame();"></div>
-                <div class="ui-item"><label>Расстояние между платформами</label><input type="range" id="inp-plat-gap" min="150" max="500" value="220" oninput="liveStyle(); if(game.active) initGame();"></div>
-                <div class="ui-item"><label>Стартовая высота платформ (↑↓)</label><input type="range" id="inp-plat-start" min="100" max="380" value="180" oninput="liveStyle(); if(game.active) initGame();"></div>
+                <div class="ui-item"><label id="l-anstxtsz">Размер текста ответов</label><input type="range" id="inp-ans-size" min="8" max="48" value="20" oninput="liveStyle(); reinitDebounced();"></div>
+                <div class="ui-item"><label id="l-anstxtoff">Положение текста (↑↓)</label><input type="range" id="inp-ans-off" min="-60" max="60" value="7" oninput="liveStyle(); reinitDebounced();"></div>
+                <div class="ui-item"><label>Положение картинки (↑↓)</label><input type="range" id="inp-img-off" min="-60" max="60" value="-8" oninput="liveStyle(); reinitDebounced();"></div>
+                <div class="ui-item"><label>Размер картинки на платформе</label><input type="range" id="inp-img-size" min="10" max="120" value="40" oninput="liveStyle(); reinitDebounced();"></div>
+                <div class="ui-item"><label>Расстояние между платформами</label><input type="range" id="inp-plat-gap" min="150" max="500" value="220" oninput="liveStyle(); reinitDebounced();"></div>
+                <div class="ui-item"><label>Стартовая высота платформ (↑↓)</label><input type="range" id="inp-plat-start" min="100" max="380" value="180" oninput="liveStyle(); reinitDebounced();"></div>
             </div>
             <label style="margin-top:10px; cursor:pointer; font-size:10px;"><input type="checkbox" id="shuffle-check" checked> <span id="l-shuf">ПЕРЕМЕШИВАТЬ ВОПРОСЫ</span></label>
         </div>
@@ -261,6 +261,13 @@ function updateRabbit(url) {
     rabbitImg.style.display = 'block'; 
 }
 function updateWinRabbit(url) { if(!url) return; winRabbitImg.src = url; winRabbitImg.style.display = 'block'; }
+
+let _reinitTimer = null;
+function reinitDebounced() {
+    if (!game.active) return;
+    clearTimeout(_reinitTimer);
+    _reinitTimer = setTimeout(() => { initGame(); }, 350);
+}
 
 function liveStyle() {
     game.feetOffset = parseInt(document.getElementById('inp-off').value) || 0;
