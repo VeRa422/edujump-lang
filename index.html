@@ -124,14 +124,24 @@
                 <div class="ui-item"><label id="l-land">Приземление</label><input type="range" id="inp-off" min="-150" max="150" value="0" oninput="liveStyle()"></div>
                 <div class="ui-item"><label id="l-anstxtsz">Размер текста ответов</label><input type="range" id="inp-ans-size" min="8" max="48" value="20" oninput="liveStyle()"></div>
                 <div class="ui-item"><label id="l-anstxtoff">Положение текста (↑↓)</label><input type="range" id="inp-ans-off" min="-60" max="60" value="7" oninput="liveStyle()"></div>
+                <div class="ui-item"><label>Положение картинки (↑↓)</label><input type="range" id="inp-img-off" min="-60" max="60" value="-8" oninput="liveStyle()"></div>
+                <div class="ui-item"><label>Размер картинки на платформе</label><input type="range" id="inp-img-size" min="10" max="120" value="40" oninput="liveStyle()"></div>
+                <div class="ui-item"><label>Размер картинки в вопросе</label><input type="range" id="inp-qimg-size" min="10" max="120" value="48" oninput="liveStyle()"></div>
             </div>
             <label style="margin-top:10px; cursor:pointer; font-size:10px;"><input type="checkbox" id="shuffle-check" checked> <span id="l-shuf">ПЕРЕМЕШИВАТЬ ВОПРОСЫ</span></label>
         </div>
 
         <h2 id="h-tasks">📝 ЗАДАНИЯ</h2>
-        <div class="box"><textarea id="bulk">Одиннадцать | 11 | 12
+        <div class="box">
+            <div style="font-size:10px; color:#94a3b8; margin-bottom:6px; line-height:1.5;">
+                Формат: <span style="color:#fff">Вопрос | Правильный | Неправильный</span><br>
+                Картинка: вставьте ссылку в квадратных скобках <span style="color:#f59e0b">[https://ссылка.png]</span> в любую часть строки.<br>
+                Пример: <span style="color:#94a3b8">Что это? | Кот [https://cat.png] | Пёс [https://dog.png]</span>
+            </div>
+            <textarea id="bulk">Одиннадцать | 11 | 12
 Двенадцать | 12 | 20
-Тринадцать | 13 | 30</textarea></div>
+Тринадцать | 13 | 30</textarea>
+        </div>
         
         <h2 id="h-sounds">🎵 ЗВУКИ (URL)</h2>
         <div class="box">
@@ -253,7 +263,7 @@ function updateWinRabbit(url) { if(!url) return; winRabbitImg.src = url; winRabb
 function liveStyle() {
     game.feetOffset = parseInt(document.getElementById('inp-off').value) || 0;
     game.parallaxSpeed = parseInt(document.getElementById('inp-para').value) / 100;
-    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7 };
+    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7, imgOff: parseInt(document.getElementById('inp-img-off').value) ?? -8, imgSize: parseInt(document.getElementById('inp-img-size').value) || 40, qImgSize: parseInt(document.getElementById('inp-qimg-size').value) || 48 };
     
     qOverlay.style.background = cfg.st.qBg; qOverlay.style.borderColor = cfg.st.qBd; qOverlay.style.color = cfg.st.qTxt; qOverlay.style.fontFamily = cfg.st.font;
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
@@ -271,7 +281,21 @@ function liveStyle() {
     }
 }
 
-function updateQ(text) { qOverlay.innerText = text; }
+function parseImgTags(text) {
+    return text
+        .replace(/\[img:(https?:\/\/[^\]]+)\]/g, (_, url) => 
+            `<img src="${url}" style="max-height:${cfg.st?.qImgSize||48}px; max-width:${(cfg.st?.qImgSize||48)*3}px; vertical-align:middle; border-radius:4px; margin:0 4px;" crossorigin="anonymous">`)
+        .replace(/\[(https?:\/\/[^\]]+)\]/g, (_, url) => 
+            `<img src="${url}" style="max-height:${cfg.st?.qImgSize||48}px; max-width:${(cfg.st?.qImgSize||48)*3}px; vertical-align:middle; border-radius:4px; margin:0 4px;" crossorigin="anonymous">`);
+}
+function updateQ(text) { qOverlay.innerHTML = parseImgTags(text); }
+
+function makePlat(x, cy, w, h, isOk, txt, q) {
+    const imgMatch = txt.match(/\[img:(https?:\/\/[^\]]+)\]/) || txt.match(/\[(https?:\/\/[^\]]+)\]/);
+    const platImg = imgMatch ? (() => { const im = new Image(); im.crossOrigin='anonymous'; im.onload = () => {}; im.onerror = () => { im._failed=true; }; im.src=imgMatch[1]; return im; })() : null;
+    const cleanTxt = txt.replace(/\[img:[^\]]+\]/g, '').replace(/\[https?:\/\/[^\]]+\]/g, '').trim();
+    return { x, y: cy, w, h, isOk, txt: cleanTxt, platImg, q };
+}
 
 function initGame() {
     if(game.loopId) cancelAnimationFrame(game.loopId);
@@ -279,19 +303,29 @@ function initGame() {
     
     loadAudio('start', document.getElementById('s-start').value); loadAudio('ok', document.getElementById('s-ok').value); loadAudio('err', document.getElementById('s-err').value); loadAudio('win', document.getElementById('s-win').value);
 
-    cfg.lv = document.getElementById('bulk').value.split('\n').filter(l => l.includes('|')).map(line => { const p = line.split('|').map(x => x.trim()); return { q: p[0], a: p[1], w: p[2] }; });
+    const rawBulk = document.getElementById('bulk').value;
+    // Склеиваем строки которые не содержат | (перенос длинных URL)
+    const joinedBulk = rawBulk.split('\n').reduce((acc, line) => {
+        if (acc.length > 0 && !line.includes('|') && line.trim() !== '') {
+            acc[acc.length - 1] += ' ' + line.trim();
+        } else {
+            acc.push(line);
+        }
+        return acc;
+    }, []).join('\n');
+    cfg.lv = joinedBulk.split('\n').filter(l => l.includes('|')).map(line => { const p = line.split('|').map(x => x.trim()); return { q: p[0], a: p[1], w: p[2] }; });
     game.active = true; game.camY = 0; game.won = false; game.particles = []; winUI.style.display = 'none'; qOverlay.style.display = 'flex';
     rabbitImg.style.transform = 'rotate(0deg) scale(1)'; 
     if(cfg.audios.start) cfg.audios.start.play().catch(()=>{});
     
     let wl = [...cfg.lv]; if (document.getElementById('shuffle-check').checked) { for (let i = wl.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [wl[i],wl[j]]=[wl[j],wl[i]]; } }
     game.currentQ = wl[0]?.q || ""; updateQ(game.currentQ);
-    game.platforms = [{ x: 400, y: 400, w: cfg.st.pW * 1.4, h: cfg.st.pH, isOk: true, txt: document.getElementById('lbl-start').value, q: wl[0]?.q || "" }];
+    game.platforms = [makePlat(400, 400, cfg.st.pW * 1.4, cfg.st.pH, true, document.getElementById('lbl-start').value, wl[0]?.q || "")];
     
     const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
     game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
     
-    let cy = 400; wl.forEach((level, i) => { cy -= 220; let isL = Math.random() > 0.5; game.platforms.push({ x: 230, y: cy, w: cfg.st.pW, h: cfg.st.pH, isOk: isL, txt: isL ? level.a : level.w, q: wl[i+1]?.q || FINISH_MARKER }); game.platforms.push({ x: 570, y: cy, w: cfg.st.pW, h: cfg.st.pH, isOk: !isL, txt: !isL ? level.a : level.w, q: wl[i+1]?.q || FINISH_MARKER }); });
+    let cy = 400; wl.forEach((level, i) => { cy -= 220; let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
     game.totalClimb = 400 - cy; render();
 }
 
@@ -334,7 +368,11 @@ function draw() {
     ctx.save(); ctx.translate(0, game.camY);
     game.platforms.forEach(pl => { 
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
-        ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; 
+        if (pl.platImg && pl.platImg.complete && pl.platImg.naturalWidth > 0 && !pl.platImg._failed) {
+            const iH = Math.min(pl.h * 0.9, cfg.st.imgSize), iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
+            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
+            if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round(cfg.st.ansSize*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; }
+        } else { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; } 
     });
     game.particles.forEach(pt => { ctx.save(); if(cfg.st.useGlow){ctx.shadowBlur=10;ctx.shadowColor=pt.c;} ctx.fillStyle=pt.c; ctx.globalAlpha=pt.life; if(cfg.st.fx === 'hearts') { ctx.font = '18px serif'; ctx.fillText('❤️', pt.x, pt.y); } else if(cfg.st.fx === 'stars') { ctx.font = '18px serif'; ctx.fillText('⭐', pt.x, pt.y); } else { ctx.fillRect(pt.x, pt.y, pt.s, pt.s); } ctx.restore(); });
     const hR = rabbitImg.offsetHeight || cfg.st.hSize; rabbitImg.style.left = (game.player.x - cfg.st.hSize/2)+'px'; rabbitImg.style.top = (game.player.y - hR/2 + game.camY)+'px'; ctx.restore();
@@ -349,7 +387,6 @@ window.addEventListener('pointerdown', () => {}, { once: true });
 let finalExport = "";
 function generateGeniallyCode() {
     liveStyle();
-    const baseUrl = 'https://vera422.github.io/edujump-lang/index.html';
     
     const d = { 
         h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
@@ -358,6 +395,9 @@ function generateGeniallyCode() {
     };
     
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
+    
+    // Используем текущий файл как плеер (он поддерживает embed-mode и картинки)
+    let baseUrl = window.location.href.split('?')[0];
     
     finalExport = `
     <div style="width:100%; height:100%; overflow:hidden; position:relative; background:transparent;">
@@ -402,6 +442,9 @@ function initFromUrl() {
                 document.getElementById('st-p-w').value = d.st.pW; document.getElementById('st-p-h').value = d.st.pH; document.getElementById('st-h-size').value = d.st.hSize;
                 if(d.st.ansSize !== undefined) document.getElementById('inp-ans-size').value = d.st.ansSize;
                 if(d.st.ansOff !== undefined) document.getElementById('inp-ans-off').value = d.st.ansOff;
+                if(d.st.imgOff !== undefined) document.getElementById('inp-img-off').value = d.st.imgOff;
+                if(d.st.imgSize !== undefined) document.getElementById('inp-img-size').value = d.st.imgSize;
+                if(d.st.qImgSize !== undefined) document.getElementById('inp-qimg-size').value = d.st.qImgSize;
             }
             if(d.para !== undefined) document.getElementById('inp-para').value = Math.round(d.para * 100);
             if(d.off !== undefined) document.getElementById('inp-off').value = d.off;
