@@ -360,7 +360,7 @@ function render() {
         if (p.vy !== 0 || p.y < (p.lastPlatY - 100)) { p.vy += 0.8; p.y += p.vy; p.x += (p.targetX - p.x) * 0.12; }
         game.platforms.forEach(plat => { 
             const b = p.y + hReal/2 + game.feetOffset; 
-            if(p.vy > 0 && Math.abs(p.x - plat.x) < (plat.w/2 + 20) && b > plat.y - cfg.st.pH/2 && b < plat.y + cfg.st.pH/2 + p.vy) {
+            if(p.vy > 0 && Math.abs(p.x - plat.x) < (plat.w/2 + 20) && b > plat.y - cfg.st.pH/2 && b < plat.y + cfg.st.pH/2 + Math.min(p.vy, 20)) {
                 if(plat.isOk){
                     const currentHReal = rabbitImg.offsetHeight || cfg.st.hSize;
                     p.lastPlatY=plat.y; p.y=plat.y-cfg.st.pH/2-currentHReal/2-game.feetOffset;
@@ -424,7 +424,7 @@ stage.addEventListener('pointerdown', (e) => {
     if (nearest) {
         game.player.targetX = nearest.x;
         const gap = parseInt(document.getElementById('inp-plat-gap').value) || 220;
-        game.player.vy = -Math.ceil(Math.sqrt(1.6 * gap) * 1.1);
+        game.player.vy = -Math.ceil(Math.sqrt(1.6 * gap) * 1.05);
     }
 });
 
