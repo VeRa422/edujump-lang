@@ -239,6 +239,19 @@ function switchLang() {
     liveStyle();
 }
 
+// Unlock audio on first any user interaction (required by browsers in iframes)
+function unlockAudio() {
+    Object.values(cfg.audios).forEach(a => {
+        if (a) { a.play().catch(()=>{}); setTimeout(()=>{ a.pause(); a.currentTime=0; }, 1); }
+    });
+    document.removeEventListener('click', unlockAudio);
+    document.removeEventListener('touchstart', unlockAudio);
+    document.removeEventListener('pointerdown', unlockAudio);
+}
+document.addEventListener('click', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
+document.addEventListener('pointerdown', unlockAudio);
+
 const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), rabbitImg = document.getElementById('rabbit-gif'), winRabbitImg = document.getElementById('win-rabbit-gif'), winUI = document.getElementById('win-ui'), stage = document.getElementById('stage'), qOverlay = document.getElementById('q-overlay');
 let cfg = { lv: [], pImg: null, bImg: null, audios: {}, labels: {}, st: {}, globalVol: 0.5 };
 let game = { active: false, loopId: null, camY: 0, player: { x: 400, y: 300, vy: 0, targetX: 400, lastPlatY: 400 }, platforms: [], particles: [], feetOffset: 0, won: false, currentQ: "", parallaxSpeed: 1, totalClimb: 0 };
