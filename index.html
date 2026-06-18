@@ -340,18 +340,19 @@ function initGame() {
     
     // Gap between platforms: base 220px + extra space if images are large (so they don't hide under q-overlay)
     const platGap = 220 + Math.max(0, (cfg.st.imgSize || 0) - 30);
-    // q-overlay bottom edge in canvas coords (approx 90px height + 8px top)
-    const qOverlayBottom = (qOverlay.offsetHeight || 80) + 8 + 16;
-    // Top of image above platform = platY + imgOff - imgSize/2
-    // We need: platY + imgOff - imgSize/2 + camY(=0 at start) > qOverlayBottom
-    // So minimum platY = qOverlayBottom - imgOff + imgSize/2 + 20 (safety margin)
+    // Canvas Y: 0=top, 450=bottom. Platforms go UP (cy decreases).
+    // q-overlay occupies top ~90px. Image top = platY + imgOff - imgSize/2.
+    // Image must not enter q-overlay zone: imgTop > qBottom
+    // platY + imgOff - imgSize/2 > qBottom  =>  platY > qBottom - imgOff + imgSize/2
+    const qBottom = (qOverlay.offsetHeight || 80) + 8 + 20;
     const imgOff = cfg.st.imgOff || 0;
     const imgSize = cfg.st.imgSize || 0;
-    const minFirstPlatY = qOverlayBottom - imgOff + imgSize / 2 + 20;
-    // Start cy at 400 (start platform), first answer platform must be at minFirstPlatY or lower
+    // maxFirstPlatY = highest allowed Y for first platform (largest number still below q-overlay)
+    const maxFirstPlatY = qBottom - imgOff + imgSize / 2 + 10;
     let cy = 400; wl.forEach((level, i) => { 
         cy -= platGap;
-        if (i === 0 && cy < minFirstPlatY) cy = minFirstPlatY;
+        // If first platform would be too high (cy too small = too close to top), push it down
+        if (i === 0 && cy < maxFirstPlatY) cy = maxFirstPlatY;
         let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
     game.totalClimb = 400 - cy; render();
 }
