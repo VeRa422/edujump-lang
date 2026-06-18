@@ -338,7 +338,9 @@ function initGame() {
     const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
     game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
     
-    let cy = 400; wl.forEach((level, i) => { cy -= 220; let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
+    // Gap between platforms: base 220px + extra space if images are large (so they don't hide under q-overlay)
+    const platGap = 220 + Math.max(0, (cfg.st.imgSize || 0) - 30);
+    let cy = 400; wl.forEach((level, i) => { cy -= platGap; let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
     game.totalClimb = 400 - cy; render();
 }
 
