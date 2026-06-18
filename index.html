@@ -402,7 +402,12 @@ function draw() {
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
         if (pl.platImg && pl.platImg.complete && pl.platImg.naturalWidth > 0 && !pl.platImg._failed) {
             const iH = cfg.st.imgSize, iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
-            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
+            // Ensure image top never goes above q-overlay bottom (in screen coords = canvas coords + camY)
+            const qBottomScreen = (qOverlay.offsetHeight || 80) + 8 + 10;
+            const desiredImgY = pl.y - iH/2 + cfg.st.imgOff; // in world coords (camY already applied by ctx.translate)
+            const imgTopScreen = desiredImgY + game.camY; // convert to screen coords
+            const imgYCorrected = imgTopScreen < qBottomScreen ? desiredImgY + (qBottomScreen - imgTopScreen) : desiredImgY;
+            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(imgYCorrected), iW, iH);
             if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round(cfg.st.ansSize*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; }
         } else { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; } 
     });
