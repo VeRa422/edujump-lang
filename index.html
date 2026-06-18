@@ -128,6 +128,8 @@
                 <div class="ui-item"><label>Положение картинки (↑↓)</label><input type="range" id="inp-img-off" min="-60" max="60" value="-8" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Размер картинки на платформе</label><input type="range" id="inp-img-size" min="10" max="120" value="40" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Расстояние между платформами</label><input type="range" id="inp-plat-gap" min="150" max="500" value="220" oninput="liveStyle(); reinitDebounced();"></div>
+                <div class="ui-item"><label>Картинка в вопросе (←→)</label><input type="range" id="inp-qimg-x" min="-300" max="300" value="0" oninput="liveStyle()"></div>
+                <div class="ui-item"><label>Герой (←→)</label><input type="range" id="inp-hero-x" min="-350" max="350" value="0" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Стартовая высота платформ (↑↓)</label><input type="range" id="inp-plat-start" min="100" max="380" value="180" oninput="liveStyle(); reinitDebounced();"></div>
             </div>
             <label style="margin-top:10px; cursor:pointer; font-size:10px;"><input type="checkbox" id="shuffle-check" checked> <span id="l-shuf">ПЕРЕМЕШИВАТЬ ВОПРОСЫ</span></label>
@@ -272,7 +274,7 @@ function reinitDebounced() {
 function liveStyle() {
     game.feetOffset = parseInt(document.getElementById('inp-off').value) || 0;
     game.parallaxSpeed = parseInt(document.getElementById('inp-para').value) / 100;
-    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7, imgOff: parseInt(document.getElementById('inp-img-off').value) || -8, imgSize: parseInt(document.getElementById('inp-img-size').value) || 40 };
+    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7, imgOff: parseInt(document.getElementById('inp-img-off').value) || -8, imgSize: parseInt(document.getElementById('inp-img-size').value) || 40, qImgX: parseInt(document.getElementById('inp-qimg-x').value) || 0, heroX: parseInt(document.getElementById('inp-hero-x').value) || 0 };
     
     qOverlay.style.background = cfg.st.qBg; qOverlay.style.borderColor = cfg.st.qBd; qOverlay.style.color = cfg.st.qTxt; qOverlay.style.fontFamily = cfg.st.font;
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
@@ -294,11 +296,11 @@ function liveStyle() {
 function parseImgTags(text) {
     return text
         .replace(/\[img:(https?:\/\/[^\]]+)\]/g, (_, url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`)
+            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; position:relative; left:${cfg.st?.qImgX||0}px;" crossorigin="anonymous">`)
         .replace(/\[(https?:\/\/[^\]]+)\]/g, (_, url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`)
+            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; position:relative; left:${cfg.st?.qImgX||0}px;" crossorigin="anonymous">`)
         .replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, (url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`);
+            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; position:relative; left:${cfg.st?.qImgX||0}px;" crossorigin="anonymous">`);
 }
 function updateQ(text) {
     qOverlay.innerHTML = parseImgTags(text);
@@ -338,14 +340,15 @@ function initGame() {
     cfg.lv = joinedBulk.split('\n').filter(l => l.includes('|')).map(line => { const p = line.split('|').map(x => x.trim()); return { q: p[0], a: p[1], w: p[2] }; });
     game.active = true; game.camY = 0; game.won = false; game.particles = []; winUI.style.display = 'none'; qOverlay.style.display = 'flex';
     rabbitImg.style.transform = 'rotate(0deg) scale(1)'; 
-    if(cfg.audios.start) cfg.audios.start.play().catch(()=>{});
+    if(cfg.audios.start && document.documentElement.classList.contains('embed-mode')) cfg.audios.start.play().catch(()=>{});
     
     let wl = [...cfg.lv]; if (document.getElementById('shuffle-check').checked) { for (let i = wl.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [wl[i],wl[j]]=[wl[j],wl[i]]; } }
     game.currentQ = wl[0]?.q || ""; updateQ(game.currentQ);
     game.platforms = [makePlat(400, 400, cfg.st.pW * 1.4, cfg.st.pH, true, document.getElementById('lbl-start').value, wl[0]?.q || "")];
     
     const hReal = rabbitImg.offsetHeight || cfg.st.hSize; 
-    game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
+    const heroStartX = 400 + (cfg.st.heroX || 0);
+    game.player = { x: heroStartX, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: heroStartX, lastPlatY: 400 }; 
     
     // Gap between platforms: base 220px + extra space if images are large (so they don't hide under q-overlay)
     const imgSize = cfg.st.imgSize || 0;
@@ -433,7 +436,7 @@ function generateGeniallyCode() {
     const d = { 
         h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
         l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value }, 
-        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked, platGap: parseInt(document.getElementById('inp-plat-gap').value)||220, platStart: parseInt(document.getElementById('inp-plat-start').value)||180 
+        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked, platGap: parseInt(document.getElementById('inp-plat-gap').value)||220, platStart: parseInt(document.getElementById('inp-plat-start').value)||180, qImgX: parseInt(document.getElementById('inp-qimg-x').value)||0, heroX: parseInt(document.getElementById('inp-hero-x').value)||0 
     };
     
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
@@ -492,6 +495,8 @@ function initFromUrl() {
             if(d.shuf !== undefined) document.getElementById('shuffle-check').checked = d.shuf;
             if(d.platGap !== undefined) document.getElementById('inp-plat-gap').value = d.platGap;
             if(d.platStart !== undefined) document.getElementById('inp-plat-start').value = d.platStart;
+            if(d.qImgX !== undefined) document.getElementById('inp-qimg-x').value = d.qImgX;
+            if(d.heroX !== undefined) document.getElementById('inp-hero-x').value = d.heroX;
 
             updateRabbit(document.getElementById('inp-h').value);
             updateWinRabbit(document.getElementById('inp-h-win').value);
