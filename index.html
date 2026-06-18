@@ -127,6 +127,8 @@
                 <div class="ui-item"><label id="l-anstxtoff">Положение текста (↑↓)</label><input type="range" id="inp-ans-off" min="-60" max="60" value="7" oninput="liveStyle()"></div>
                 <div class="ui-item"><label>Положение картинки (↑↓)</label><input type="range" id="inp-img-off" min="-60" max="60" value="-8" oninput="liveStyle()"></div>
                 <div class="ui-item"><label>Размер картинки на платформе</label><input type="range" id="inp-img-size" min="10" max="120" value="40" oninput="liveStyle()"></div>
+                <div class="ui-item"><label>Расстояние между платформами</label><input type="range" id="inp-plat-gap" min="150" max="500" value="220" oninput="liveStyle()"></div>
+                <div class="ui-item"><label>Стартовая высота платформ (↑↓)</label><input type="range" id="inp-plat-start" min="100" max="380" value="180" oninput="liveStyle()"></div>
             </div>
             <label style="margin-top:10px; cursor:pointer; font-size:10px;"><input type="checkbox" id="shuffle-check" checked> <span id="l-shuf">ПЕРЕМЕШИВАТЬ ВОПРОСЫ</span></label>
         </div>
@@ -351,8 +353,9 @@ function initGame() {
         ? Math.min(8, imgTopWhenCentred - qOverlayH - 10)
         : 8;
     qOverlay.style.top = qOverlayTop + 'px';
-    const platGap = 220;
-    let cy = 400; wl.forEach((level, i) => { 
+    const platGap = parseInt(document.getElementById('inp-plat-gap').value) || 220;
+    const platStartY = parseInt(document.getElementById('inp-plat-start').value) || 180;
+    let cy = 400 - (220 - platStartY); wl.forEach((level, i) => { 
         cy -= platGap;
         let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
     game.totalClimb = 400 - cy; render();
@@ -423,7 +426,7 @@ function generateGeniallyCode() {
     const d = { 
         h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
         l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value }, 
-        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked 
+        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked, platGap: parseInt(document.getElementById('inp-plat-gap').value)||220, platStart: parseInt(document.getElementById('inp-plat-start').value)||180 
     };
     
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
@@ -480,6 +483,8 @@ function initFromUrl() {
             if(d.para !== undefined) document.getElementById('inp-para').value = Math.round(d.para * 100);
             if(d.off !== undefined) document.getElementById('inp-off').value = d.off;
             if(d.shuf !== undefined) document.getElementById('shuffle-check').checked = d.shuf;
+            if(d.platGap !== undefined) document.getElementById('inp-plat-gap').value = d.platGap;
+            if(d.platStart !== undefined) document.getElementById('inp-plat-start').value = d.platStart;
 
             updateRabbit(document.getElementById('inp-h').value);
             updateWinRabbit(document.getElementById('inp-h-win').value);
