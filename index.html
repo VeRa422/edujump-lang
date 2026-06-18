@@ -339,20 +339,10 @@ function initGame() {
     game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
     
     // Gap between platforms: base 220px + extra space if images are large (so they don't hide under q-overlay)
-    const platGap = 220 + Math.max(0, (cfg.st.imgSize || 0) - 30);
-    // Canvas Y: 0=top, 450=bottom. Platforms go UP (cy decreases).
-    // q-overlay occupies top ~90px. Image top = platY + imgOff - imgSize/2.
-    // Image must not enter q-overlay zone: imgTop > qBottom
-    // platY + imgOff - imgSize/2 > qBottom  =>  platY > qBottom - imgOff + imgSize/2
-    const qBottom = (qOverlay.offsetHeight || 80) + 8 + 20;
-    const imgOff = cfg.st.imgOff || 0;
-    const imgSize = cfg.st.imgSize || 0;
-    // maxFirstPlatY = highest allowed Y for first platform (largest number still below q-overlay)
-    const maxFirstPlatY = qBottom - imgOff + imgSize / 2 + 10;
+    // Gap between platform pairs = base 220 + extra for image size
+    const platGap = 220 + Math.max(0, (cfg.st.imgSize || 0) - 20);
     let cy = 400; wl.forEach((level, i) => { 
         cy -= platGap;
-        // If first platform would be too high (cy too small = too close to top), push it down
-        if (i === 0 && cy < maxFirstPlatY) cy = maxFirstPlatY;
         let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
     game.totalClimb = 400 - cy; render();
 }
@@ -379,7 +369,7 @@ function render() {
                 } else{p.vy=-8;p.targetX=400;if(cfg.audios.err){cfg.audios.err.currentTime=0;cfg.audios.err.play().catch(()=>{});}}
             }
         });
-        game.camY += ((300 - p.y) - game.camY) * 0.1; if(p.y > 650 - game.camY) initGame();
+        game.camY += ((340 - p.y) - game.camY) * 0.1; if(p.y > 650 - game.camY) initGame();
     } else { game.particles.forEach(pt => { pt.x += pt.vx; pt.y += pt.vy; pt.vy+=0.2; pt.life-=0.01; }); }
     draw(); game.loopId = requestAnimationFrame(render);
 }
@@ -402,12 +392,7 @@ function draw() {
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
         if (pl.platImg && pl.platImg.complete && pl.platImg.naturalWidth > 0 && !pl.platImg._failed) {
             const iH = cfg.st.imgSize, iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
-            // Ensure image top never goes above q-overlay bottom (in screen coords = canvas coords + camY)
-            const qBottomScreen = (qOverlay.offsetHeight || 80) + 8 + 10;
-            const desiredImgY = pl.y - iH/2 + cfg.st.imgOff; // in world coords (camY already applied by ctx.translate)
-            const imgTopScreen = desiredImgY + game.camY; // convert to screen coords
-            const imgYCorrected = imgTopScreen < qBottomScreen ? desiredImgY + (qBottomScreen - imgTopScreen) : desiredImgY;
-            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(imgYCorrected), iW, iH);
+            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
             if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round(cfg.st.ansSize*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; }
         } else { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; } 
     });
