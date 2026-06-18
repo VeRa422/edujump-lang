@@ -306,7 +306,7 @@ function updateQ(text) {
 function makePlat(x, cy, w, h, isOk, txt, q) {
     const imgMatch = txt.match(/\[img:(https?:\/\/[^\]]+)\]/) || txt.match(/\[(https?:\/\/[^\]]+)\]/) || txt.match(/(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s|]*)?)(?:\s|$)/);
     const platImg = imgMatch ? (() => { const im = new Image(); im.crossOrigin='anonymous'; im.onload = () => {}; im.onerror = () => { im._failed=true; }; im.src=imgMatch[1]; return im; })() : null;
-    const cleanTxt = txt.replace(/\[img:[^\]]+\]/g, '').replace(/\[https?:\/\/[^\]]+\]/g, '').replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, '').trim();
+    const cleanTxt = txt.replace(/\[img:[^\]]+\]/g, '').replace(/\[[^\]]*\]/g, '').replace(/https?:\/\/\S+/g, '').trim();
     return { x, y: cy, w, h, isOk, txt: cleanTxt, platImg, q };
 }
 
@@ -345,20 +345,29 @@ function initGame() {
 function render() {
     if(!game.active) return;
 
-    // Dynamically position q-overlay so it never overlaps images sitting on top of platforms
-    {
-        let minImgTop = Infinity; // highest point of any visible platform image in canvas coords
+    // Dynamically position q-overlay: place it just above the highest platform image, with gap
+    try {
+        const imgSize = cfg.st.imgSize || 0;
+        const imgOff = cfg.st.imgOff || 0;
+        const pH = cfg.st.pH || 60;
+        let minImgTop = Infinity;
         game.platforms.forEach(pl => {
             if (!pl.platImg || !pl.platImg.complete || pl.platImg.naturalWidth === 0) return;
-            const platTopInCanvas = pl.y - cfg.st.pH/2 + game.camY;
-            if (platTopInCanvas > 420 || platTopInCanvas < -cfg.st.imgSize*3) return; // off screen
-            const imgTopInCanvas = (pl.y + cfg.st.imgOff) - cfg.st.imgSize/2 + game.camY;
+            const platTopInCanvas = pl.y - pH/2 + game.camY;
+            if (platTopInCanvas > 420 || platTopInCanvas < -imgSize*3) return;
+            const imgTopInCanvas = (pl.y + imgOff) - imgSize/2 + game.camY;
             if (imgTopInCanvas < minImgTop) minImgTop = imgTopInCanvas;
         });
-        // Place q-overlay top at least 8px above the highest image, minimum 8px from canvas top
-        const overlayTop = minImgTop === Infinity ? 8 : Math.max(8, minImgTop - qOverlay.offsetHeight - 8);
-        qOverlay.style.top = overlayTop + 'px';
-    }
+        if (minImgTop === Infinity) {
+            // No images - overlay at top
+            qOverlay.style.top = '8px';
+        } else {
+            // Place overlay so its BOTTOM is at least 12px above the highest image top
+            const overlayH = qOverlay.offsetHeight || 60;
+            const overlayTop = Math.max(8, minImgTop - overlayH - 12);
+            qOverlay.style.top = overlayTop + 'px';
+        }
+    } catch(e) { qOverlay.style.top = '8px'; }
 
     if(!game.won) {
         const p = game.player; const hReal = rabbitImg.offsetHeight || cfg.st.hSize;
