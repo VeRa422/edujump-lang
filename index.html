@@ -15,7 +15,9 @@
         .embed-mode #editor { display: none !important; }
         .embed-mode body, .embed-mode #game-area { background: transparent !important; }
         
-        #editor { width: 440px; background: var(--pn); border-right: 2px solid var(--bd); display: flex; flex-direction: column; padding: 15px; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        #editor { width: 440px; background: var(--pn); border-right: 2px solid var(--bd); display: flex; flex-direction: column; padding: 15px; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); pointer-events: all; }
+        #editor * { pointer-events: all; }
+        #editor button, #editor input, #editor select, #editor textarea { pointer-events: all; cursor: pointer; }
         .scroll { flex: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 10px; }
         h2 { font-family: 'Chakra Petch'; color: var(--acc); font-size: 0.8rem; margin: 15px 0 8px; text-transform: uppercase; border-bottom: 1px solid var(--bd); padding-bottom: 4px; letter-spacing: 1px; }
         .box { background: rgba(255,255,255,0.03); border: 1px solid var(--bd); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
