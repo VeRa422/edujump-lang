@@ -17,7 +17,6 @@
         
         #editor { width: 440px; background: var(--pn); border-right: 2px solid var(--bd); display: flex; flex-direction: column; padding: 15px; z-index: 100; box-shadow: 5px 0 15px rgba(0,0,0,0.5); pointer-events: all; }
         #editor * { pointer-events: all; }
-        #editor button, #editor input, #editor select, #editor textarea { pointer-events: all; cursor: pointer; }
         .scroll { flex: 1; overflow-y: auto; padding-right: 10px; margin-bottom: 10px; }
         h2 { font-family: 'Chakra Petch'; color: var(--acc); font-size: 0.8rem; margin: 15px 0 8px; text-transform: uppercase; border-bottom: 1px solid var(--bd); padding-bottom: 4px; letter-spacing: 1px; }
         .box { background: rgba(255,255,255,0.03); border: 1px solid var(--bd); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
@@ -43,7 +42,7 @@
         #win-title { width: 100%; word-wrap: break-word; font-size: 2.2rem; margin: 10px 0; }
         #creator-credit { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; }
         #creator-credit img { max-width: 140px; height: auto; margin-bottom: 10px; opacity: 0.8; }
-        #q-overlay { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: auto; min-width: 80px; max-width: 600px; min-height: 50px; z-index: 50; display: none; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px 20px; box-sizing: border-box; font-weight: bold; font-size: 24px; pointer-events: none; white-space: nowrap; }
+        #q-overlay { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: auto; min-width: 80px; max-width: 600px; min-height: 50px; z-index: 50; display: none; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px 20px; box-sizing: border-box; font-weight: bold; font-size: 24px; pointer-events: none; white-space: nowrap; }
         #q-overlay img { max-height: 52px; max-width: 160px; height: auto; width: auto; vertical-align: middle; border-radius: 4px; object-fit: contain; }
         .lang-opt { padding: 6px 12px; font-size: 11px; color: #fff; cursor: pointer; white-space: nowrap; font-family: 'Nunito', sans-serif; }
         .lang-opt:hover { background: rgba(255,255,255,0.1); }
@@ -130,9 +129,9 @@
                 <div class="ui-item"><label>Положение картинки (↑↓)</label><input type="range" id="inp-img-off" min="-60" max="60" value="-8" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Размер картинки на платформе</label><input type="range" id="inp-img-size" min="10" max="120" value="40" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Расстояние между платформами</label><input type="range" id="inp-plat-gap" min="150" max="500" value="220" oninput="liveStyle(); reinitDebounced();"></div>
+                <div class="ui-item"><label>Стартовая высота платформ (↑↓)</label><input type="range" id="inp-plat-start" min="100" max="380" value="180" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Картинка в ответе (←→)</label><input type="range" id="inp-img-x" min="-150" max="150" value="0" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Герой (←→)</label><input type="range" id="inp-hero-x" min="-350" max="350" value="0" oninput="liveStyle(); reinitDebounced();"></div>
-                <div class="ui-item"><label>Стартовая высота платформ (↑↓)</label><input type="range" id="inp-plat-start" min="100" max="380" value="180" oninput="liveStyle(); reinitDebounced();"></div>
             </div>
             <label style="margin-top:10px; cursor:pointer; font-size:10px;"><input type="checkbox" id="shuffle-check" checked> <span id="l-shuf">ПЕРЕМЕШИВАТЬ ВОПРОСЫ</span></label>
         </div>
@@ -141,8 +140,7 @@
         <div class="box">
             <div style="font-size:10px; color:#94a3b8; margin-bottom:6px; line-height:1.5;">
                 Формат: <span style="color:#fff">Вопрос | Правильный | Неправильный</span><br>
-                Картинка: вставьте ссылку прямо в строку — скобки не нужны!<br>
-                Пример: <span style="color:#94a3b8">Что это? | Кот https://cat.png | Пёс https://dog.png</span>
+                Картинка: вставьте ссылку прямо в строку: <span style="color:#f59e0b">https://ссылка.png</span>
             </div>
             <textarea id="bulk">Одиннадцать | 11 | 12
 Двенадцать | 12 | 20
@@ -239,11 +237,6 @@ function switchLang() {
     liveStyle();
 }
 
-// Resume AudioContext on first interaction - fixes autoplay in Genially iframe
-const _ac = new (window.AudioContext || window.webkitAudioContext)();
-function _resumeAC() { if(_ac.state==='suspended') _ac.resume(); }
-document.addEventListener('pointerdown', _resumeAC, {once:true});
-
 const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), rabbitImg = document.getElementById('rabbit-gif'), winRabbitImg = document.getElementById('win-rabbit-gif'), winUI = document.getElementById('win-ui'), stage = document.getElementById('stage'), qOverlay = document.getElementById('q-overlay');
 let cfg = { lv: [], pImg: null, bImg: null, audios: {}, labels: {}, st: {}, globalVol: 0.5 };
 let game = { active: false, loopId: null, camY: 0, player: { x: 400, y: 300, vy: 0, targetX: 400, lastPlatY: 400 }, platforms: [], particles: [], feetOffset: 0, won: false, currentQ: "", parallaxSpeed: 1, totalClimb: 0 };
@@ -271,13 +264,6 @@ function updateRabbit(url) {
 }
 function updateWinRabbit(url) { if(!url) return; winRabbitImg.src = url; winRabbitImg.style.display = 'block'; }
 
-let _reinitTimer = null;
-function reinitDebounced() {
-    if (!game.active) return;
-    clearTimeout(_reinitTimer);
-    _reinitTimer = setTimeout(() => { initGame(); }, 350);
-}
-
 function liveStyle() {
     game.feetOffset = parseInt(document.getElementById('inp-off').value) || 0;
     game.parallaxSpeed = parseInt(document.getElementById('inp-para').value) / 100;
@@ -285,7 +271,6 @@ function liveStyle() {
     
     qOverlay.style.background = cfg.st.qBg; qOverlay.style.borderColor = cfg.st.qBd; qOverlay.style.color = cfg.st.qTxt; qOverlay.style.fontFamily = cfg.st.font;
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
-    // q-overlay top is updated dynamically in render() based on actual platform positions
     
     rabbitImg.style.width = cfg.st.hSize + 'px'; 
     winRabbitImg.style.width = 'auto'; winRabbitImg.style.maxWidth = '250px'; 
@@ -302,30 +287,29 @@ function liveStyle() {
 
 function parseImgTags(text) {
     return text
-        .replace(/\[img:(https?:\/\/[^\]]+)\]/g, (_, url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; " crossorigin="anonymous">`)
-        .replace(/\[(https?:\/\/[^\]]+)\]/g, (_, url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; " crossorigin="anonymous">`)
-        .replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, (url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; " crossorigin="anonymous">`);
+        .replace(/\[img:(https?:\/\/[^\]]+)\]/g, (_, url) => `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`)
+        .replace(/\[(https?:\/\/[^\]]+)\]/g, (_, url) => `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`)
+        .replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, (url) => `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`);
 }
 function updateQ(text) {
     qOverlay.innerHTML = parseImgTags(text);
     const plain = text.replace(/\[img:[^\]]*\]/g,'').replace(/\[[^\]]*\]/g,'').replace(/https?:\/\/\S+/g,'').trim();
-    if (plain.length <= 30) {
-        qOverlay.style.whiteSpace = 'nowrap';
-        qOverlay.style.maxWidth = '700px';
-    } else {
-        qOverlay.style.whiteSpace = 'normal';
-        qOverlay.style.maxWidth = '600px';
-    }
+    if (plain.length <= 30) { qOverlay.style.whiteSpace = 'nowrap'; qOverlay.style.maxWidth = '700px'; }
+    else { qOverlay.style.whiteSpace = 'normal'; qOverlay.style.maxWidth = '600px'; }
 }
 
 function makePlat(x, cy, w, h, isOk, txt, q) {
-    const imgMatch = txt.match(/\[img:(https?:\/\/[^\]]+)\]/) || txt.match(/\[(https?:\/\/[^\]]+)\]/) || txt.match(/(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s|]*)?)(?:\s|$)/);
-    const platImg = imgMatch ? (() => { const im = new Image(); im.crossOrigin='anonymous'; im.onload = () => {}; im.onerror = () => { im._failed=true; }; im.src=imgMatch[1]; return im; })() : null;
-    const cleanTxt = txt.replace(/\[img:[^\]]+\]/g, '').replace(/\[[^\]]*\]/g, '').replace(/https?:\/\/\S+/g, '').trim();
+    const imgMatch = txt.match(/\[img:(https?:\/\/[^\]]+)\]/) || txt.match(/\[(https?:\/\/[^\]]+)\]/) || txt.match(/(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s|]*)?)/);
+    const platImg = imgMatch ? (() => { const im = new Image(); im.crossOrigin='anonymous'; im.onerror=()=>{im._failed=true;}; im.src=imgMatch[1]; return im; })() : null;
+    const cleanTxt = txt.replace(/\[img:[^\]]+\]/g,'').replace(/\[[^\]]*\]/g,'').replace(/https?:\/\/\S+/g,'').trim();
     return { x, y: cy, w, h, isOk, txt: cleanTxt, platImg, q };
+}
+
+let _reinitTimer = null;
+function reinitDebounced() {
+    if (!game.active) return;
+    clearTimeout(_reinitTimer);
+    _reinitTimer = setTimeout(() => { initGame(); }, 350);
 }
 
 function initGame() {
@@ -335,19 +319,14 @@ function initGame() {
     loadAudio('start', document.getElementById('s-start').value); loadAudio('ok', document.getElementById('s-ok').value); loadAudio('err', document.getElementById('s-err').value); loadAudio('win', document.getElementById('s-win').value);
 
     const rawBulk = document.getElementById('bulk').value;
-    // Склеиваем строки которые не содержат | (перенос длинных URL)
     const joinedBulk = rawBulk.split('\n').reduce((acc, line) => {
-        if (acc.length > 0 && !line.includes('|') && line.trim() !== '') {
-            acc[acc.length - 1] += ' ' + line.trim();
-        } else {
-            acc.push(line);
-        }
+        if (acc.length > 0 && !line.includes('|') && line.trim() !== '') { acc[acc.length-1] += ' ' + line.trim(); } else { acc.push(line); }
         return acc;
     }, []).join('\n');
     cfg.lv = joinedBulk.split('\n').filter(l => l.includes('|')).map(line => { const p = line.split('|').map(x => x.trim()); return { q: p[0], a: p[1], w: p[2] }; });
     game.active = true; game.camY = 0; game.won = false; game.particles = []; winUI.style.display = 'none'; qOverlay.style.display = 'flex';
     rabbitImg.style.transform = 'rotate(0deg) scale(1)'; 
-    // Start sound plays on first user tap (autoplay policy)
+    // стартовый звук отключён в редакторе
     
     let wl = [...cfg.lv]; if (document.getElementById('shuffle-check').checked) { for (let i = wl.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [wl[i],wl[j]]=[wl[j],wl[i]]; } }
     game.currentQ = wl[0]?.q || ""; updateQ(game.currentQ);
@@ -357,32 +336,25 @@ function initGame() {
     const heroStartX = 400 + (cfg.st.heroX || 0);
     game.player = { x: heroStartX, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: heroStartX, lastPlatY: 400 }; 
     
-    // Gap between platforms: base 220px + extra space if images are large (so they don't hide under q-overlay)
     const imgSize = cfg.st.imgSize || 0;
-    const imgOff = cfg.st.imgOff || 0;
-    // q-overlay: always at top, but pushed down by image height so images on platforms never hide behind it.
-    // When camera centres platform at screen y=300, image top = 300 - imgSize/2 + imgOff.
-    // q-overlay bottom must be <= that value minus 10px gap.
-    // q-overlay top = q-overlay bottom - q-overlay height.
-    const qOverlayH = qOverlay.offsetHeight || 70;
-    const imgTopWhenCentred = 300 - imgSize / 2 + imgOff;
-    const qOverlayTop = imgSize > 0
-        ? Math.min(8, imgTopWhenCentred - qOverlayH - 10)
-        : 8;
-    qOverlay.style.top = qOverlayTop + 'px';
+    const imgOff2 = cfg.st.imgOff || 0;
+    const qH = qOverlay.offsetHeight || 70;
+    const imgTopWhenCentred = 300 - imgSize/2 + imgOff2;
+    const qOverlayTop2 = imgSize > 0 ? Math.min(8, imgTopWhenCentred - qH - 10) : 8;
+    qOverlay.style.top = qOverlayTop2 + 'px';
     const platGap = parseInt(document.getElementById('inp-plat-gap').value) || 220;
     const platStartY = parseInt(document.getElementById('inp-plat-start').value) || 180;
-    let cy = 400 - (220 - platStartY); wl.forEach((level, i) => { 
+    let cy = 400 - (220 - platStartY); wl.forEach((level, i) => {
         cy -= platGap;
-        let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
+        let isL = Math.random() > 0.5;
+        game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER));
+        game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER));
+    });
     game.totalClimb = 400 - cy; render();
 }
 
 function render() {
     if(!game.active) return;
-
-    // q-overlay top is set once in initGame() based on image size
-
     if(!game.won) {
         const p = game.player; const hReal = rabbitImg.offsetHeight || cfg.st.hSize;
         if (p.vy !== 0 || p.y < (p.lastPlatY - 100)) { p.vy += 0.8; p.y += p.vy; p.x += (p.targetX - p.x) * 0.12; }
@@ -396,7 +368,7 @@ function render() {
                     p.vy=0; p.x=plat.x; p.targetX=plat.x; 
                     if(plat.q===FINISH_MARKER) { qOverlay.style.display='none'; triggerWin(); } 
                     else { game.currentQ = plat.q; updateQ(game.currentQ); }
-                } else{p.vy=-Math.ceil(Math.sqrt(1.6 * (parseInt(document.getElementById('inp-plat-gap').value) || 220)) * 0.5);p.targetX=400+(cfg.st.heroX||0);if(cfg.audios.err){cfg.audios.err.currentTime=0;cfg.audios.err.play().catch(()=>{});}}
+                } else{p.vy=-Math.ceil(Math.sqrt(1.6*(parseInt(document.getElementById('inp-plat-gap').value)||220))*0.5);p.targetX=400+(cfg.st.heroX||0);if(cfg.audios.err){cfg.audios.err.currentTime=0;cfg.audios.err.play().catch(()=>{});}}
             }
         });
         game.camY += ((300 - p.y) - game.camY) * 0.1; if(p.y > 650 - game.camY) initGame();
@@ -418,13 +390,15 @@ function draw() {
     }
     
     ctx.save(); ctx.translate(0, game.camY);
-    game.platforms.forEach(pl => { 
+    game.platforms.forEach(pl => {
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
         if (pl.platImg && pl.platImg.complete && pl.platImg.naturalWidth > 0 && !pl.platImg._failed) {
-            const iH = cfg.st.imgSize, iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
-            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2 + (cfg.st.imgX||0)), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
-            if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round(cfg.st.ansSize*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; }
-        } else { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; } 
+            const iH = cfg.st.imgSize || 40, iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
+            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2 + (cfg.st.imgX||0)), Math.round(pl.y - iH/2 + (cfg.st.imgOff||-8)), iW, iH);
+            if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round((cfg.st.ansSize||20)*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + (cfg.st.ansOff||7))); ctx.shadowBlur = 0; }
+        } else {
+            ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize||20}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + (cfg.st.ansOff||7))); ctx.shadowBlur = 0;
+        }
     });
     game.particles.forEach(pt => { ctx.save(); if(cfg.st.useGlow){ctx.shadowBlur=10;ctx.shadowColor=pt.c;} ctx.fillStyle=pt.c; ctx.globalAlpha=pt.life; if(cfg.st.fx === 'hearts') { ctx.font = '18px serif'; ctx.fillText('❤️', pt.x, pt.y); } else if(cfg.st.fx === 'stars') { ctx.font = '18px serif'; ctx.fillText('⭐', pt.x, pt.y); } else { ctx.fillRect(pt.x, pt.y, pt.s, pt.s); } ctx.restore(); });
     const hR = rabbitImg.offsetHeight || cfg.st.hSize; rabbitImg.style.left = (game.player.x - cfg.st.hSize/2)+'px'; rabbitImg.style.top = (game.player.y - hR/2 + game.camY)+'px'; ctx.restore();
@@ -432,24 +406,22 @@ function draw() {
 
 function triggerWin() { game.won = true; if(cfg.audios.win) { cfg.audios.win.currentTime=0; cfg.audios.win.play().catch(()=>{}); } const fx = cfg.st.fx; for(let i=0; i<80; i++) game.particles.push({ x: game.player.x, y: game.player.y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, c: fx==='fireworks'||fx==='confetti' ? `hsl(${Math.random()*360},70%,60%)` : cfg.st.glow, s: Math.random()*6+2, life: 1 }); winUI.style.display = 'flex'; }
 
-stage.addEventListener('pointerdown', (e) => { if(!_startSoundPlayed && cfg.audios.start){ cfg.audios.start.play().catch(()=>{}); _startSoundPlayed=true; } if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -Math.ceil(Math.sqrt(1.6 * (parseInt(document.getElementById('inp-plat-gap').value) || 220)) * 1.1); } }); });
+stage.addEventListener('pointerdown', (e) => { if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -Math.ceil(Math.sqrt(1.6*(parseInt(document.getElementById('inp-plat-gap').value)||220))*1.1); } }); });
 
 window.addEventListener('pointerdown', () => {}, { once: true });
 
 let finalExport = "";
 function generateGeniallyCode() {
     liveStyle();
+    let baseUrl = window.location.href.split('?')[0];
     
     const d = { 
         h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
         l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value }, 
-        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked, platGap: parseInt(document.getElementById('inp-plat-gap').value)||220, platStart: parseInt(document.getElementById('inp-plat-start').value)||180, imgX: parseInt(document.getElementById('inp-img-x').value)||0, heroX: parseInt(document.getElementById('inp-hero-x').value)||0 
+        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked, platGap: parseInt(document.getElementById('inp-plat-gap').value)||220, platStart: parseInt(document.getElementById('inp-plat-start').value)||180, imgX: parseInt(document.getElementById('inp-img-x').value)||0, heroX: parseInt(document.getElementById('inp-hero-x').value)||0
     };
     
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
-    
-    // Используем текущий файл как плеер (он поддерживает embed-mode и картинки)
-    let baseUrl = window.location.href.split('?')[0];
     
     finalExport = `
     <div style="width:100%; height:100%; overflow:hidden; position:relative; background:transparent;">
@@ -494,8 +466,6 @@ function initFromUrl() {
                 document.getElementById('st-p-w').value = d.st.pW; document.getElementById('st-p-h').value = d.st.pH; document.getElementById('st-h-size').value = d.st.hSize;
                 if(d.st.ansSize !== undefined) document.getElementById('inp-ans-size').value = d.st.ansSize;
                 if(d.st.ansOff !== undefined) document.getElementById('inp-ans-off').value = d.st.ansOff;
-                if(d.st.imgOff !== undefined) document.getElementById('inp-img-off').value = d.st.imgOff;
-                if(d.st.imgSize !== undefined) document.getElementById('inp-img-size').value = d.st.imgSize;
             }
             if(d.para !== undefined) document.getElementById('inp-para').value = Math.round(d.para * 100);
             if(d.off !== undefined) document.getElementById('inp-off').value = d.off;
@@ -509,7 +479,6 @@ function initFromUrl() {
             updateWinRabbit(document.getElementById('inp-h-win').value);
             loadImg('b', document.getElementById('inp-b').value);
             loadImg('p', document.getElementById('inp-p').value);
-            loadAudio('start', document.getElementById('s-start').value);
             loadAudio('ok', document.getElementById('s-ok').value);
             loadAudio('err', document.getElementById('s-err').value);
             loadAudio('win', document.getElementById('s-win').value);
