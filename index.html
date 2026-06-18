@@ -239,18 +239,10 @@ function switchLang() {
     liveStyle();
 }
 
-// Unlock audio on first any user interaction (required by browsers in iframes)
-function unlockAudio() {
-    Object.values(cfg.audios).forEach(a => {
-        if (a) { a.play().catch(()=>{}); setTimeout(()=>{ a.pause(); a.currentTime=0; }, 1); }
-    });
-    document.removeEventListener('click', unlockAudio);
-    document.removeEventListener('touchstart', unlockAudio);
-    document.removeEventListener('pointerdown', unlockAudio);
-}
-document.addEventListener('click', unlockAudio);
-document.addEventListener('touchstart', unlockAudio);
-document.addEventListener('pointerdown', unlockAudio);
+// Resume AudioContext on first interaction - fixes autoplay in Genially iframe
+const _ac = new (window.AudioContext || window.webkitAudioContext)();
+function _resumeAC() { if(_ac.state==='suspended') _ac.resume(); }
+document.addEventListener('pointerdown', _resumeAC, {once:true});
 
 const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), rabbitImg = document.getElementById('rabbit-gif'), winRabbitImg = document.getElementById('win-rabbit-gif'), winUI = document.getElementById('win-ui'), stage = document.getElementById('stage'), qOverlay = document.getElementById('q-overlay');
 let cfg = { lv: [], pImg: null, bImg: null, audios: {}, labels: {}, st: {}, globalVol: 0.5 };
@@ -338,7 +330,6 @@ function makePlat(x, cy, w, h, isOk, txt, q) {
 
 function initGame() {
     if(game.loopId) cancelAnimationFrame(game.loopId);
-    _startSoundPlayed = false;
     liveStyle();
     
     loadAudio('start', document.getElementById('s-start').value); loadAudio('ok', document.getElementById('s-ok').value); loadAudio('err', document.getElementById('s-err').value); loadAudio('win', document.getElementById('s-win').value);
@@ -441,7 +432,6 @@ function draw() {
 
 function triggerWin() { game.won = true; if(cfg.audios.win) { cfg.audios.win.currentTime=0; cfg.audios.win.play().catch(()=>{}); } const fx = cfg.st.fx; for(let i=0; i<80; i++) game.particles.push({ x: game.player.x, y: game.player.y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, c: fx==='fireworks'||fx==='confetti' ? `hsl(${Math.random()*360},70%,60%)` : cfg.st.glow, s: Math.random()*6+2, life: 1 }); winUI.style.display = 'flex'; }
 
-let _startSoundPlayed = false;
 stage.addEventListener('pointerdown', (e) => { if(!_startSoundPlayed && cfg.audios.start){ cfg.audios.start.play().catch(()=>{}); _startSoundPlayed=true; } if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -Math.ceil(Math.sqrt(1.6 * (parseInt(document.getElementById('inp-plat-gap').value) || 220)) * 1.1); } }); });
 
 window.addEventListener('pointerdown', () => {}, { once: true });
