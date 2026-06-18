@@ -135,8 +135,8 @@
         <div class="box">
             <div style="font-size:10px; color:#94a3b8; margin-bottom:6px; line-height:1.5;">
                 Формат: <span style="color:#fff">Вопрос | Правильный | Неправильный</span><br>
-                Картинка: вставьте ссылку в квадратных скобках <span style="color:#f59e0b">[https://ссылка.png]</span> в любую часть строки.<br>
-                Пример: <span style="color:#94a3b8">Что это? | Кот [https://cat.png] | Пёс [https://dog.png]</span>
+                Картинка: вставьте ссылку прямо в строку — скобки не нужны!<br>
+                Пример: <span style="color:#94a3b8">Что это? | Кот https://cat.png | Пёс https://dog.png</span>
             </div>
             <textarea id="bulk">Одиннадцать | 11 | 12
 Двенадцать | 12 | 20
@@ -286,14 +286,16 @@ function parseImgTags(text) {
         .replace(/\[img:(https?:\/\/[^\]]+)\]/g, (_, url) => 
             `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`)
         .replace(/\[(https?:\/\/[^\]]+)\]/g, (_, url) => 
+            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`)
+        .replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, (url) => 
             `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`);
 }
 function updateQ(text) { qOverlay.innerHTML = parseImgTags(text); }
 
 function makePlat(x, cy, w, h, isOk, txt, q) {
-    const imgMatch = txt.match(/\[img:(https?:\/\/[^\]]+)\]/) || txt.match(/\[(https?:\/\/[^\]]+)\]/);
+    const imgMatch = txt.match(/\[img:(https?:\/\/[^\]]+)\]/) || txt.match(/\[(https?:\/\/[^\]]+)\]/) || txt.match(/(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s|]*)?)(?:\s|$)/);
     const platImg = imgMatch ? (() => { const im = new Image(); im.crossOrigin='anonymous'; im.onload = () => {}; im.onerror = () => { im._failed=true; }; im.src=imgMatch[1]; return im; })() : null;
-    const cleanTxt = txt.replace(/\[img:[^\]]+\]/g, '').replace(/\[https?:\/\/[^\]]+\]/g, '').trim();
+    const cleanTxt = txt.replace(/\[img:[^\]]+\]/g, '').replace(/\[https?:\/\/[^\]]+\]/g, '').replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, '').trim();
     return { x, y: cy, w, h, isOk, txt: cleanTxt, platImg, q };
 }
 
@@ -370,7 +372,13 @@ function draw() {
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
         if (pl.platImg && pl.platImg.complete && pl.platImg.naturalWidth > 0 && !pl.platImg._failed) {
             const iH = Math.min(pl.h * 0.9, cfg.st.imgSize), iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
+            // Clip drawing to platform area so image never overlaps q-overlay
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(pl.x - pl.w/2, pl.y - pl.h/2 - iH, pl.w, pl.h + iH * 2);
+            ctx.clip();
             ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
+            ctx.restore();
             if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round(cfg.st.ansSize*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; }
         } else { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; } 
     });
