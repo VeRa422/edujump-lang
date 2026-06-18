@@ -339,8 +339,22 @@ function initGame() {
     game.player = { x: 400, y: 400 - (cfg.st.pH/2) - (hReal/2) - game.feetOffset, vy: 0, targetX: 400, lastPlatY: 400 }; 
     
     // Gap between platforms: base 220px + extra space if images are large (so they don't hide under q-overlay)
-    // Gap between platform pairs = base 220 + extra for image size
-    const platGap = 220 + Math.max(0, (cfg.st.imgSize || 0) - 20);
+    // Position q-overlay: its bottom must be above the top of images on platforms
+    // Image top in screen coords at first platform = platY - imgSize/2 + imgOff + camY(=0 at start)
+    // We set q-overlay top so its bottom = platY - imgSize/2 + imgOff - 10px gap
+    // platGap determines platY = 400 - platGap
+    const imgSize = cfg.st.imgSize || 0;
+    const imgOff = cfg.st.imgOff || 0;
+    const platGap = 220 + Math.max(0, imgSize - 20);
+    const firstPlatY = 400 - platGap;
+    // top of image on first platform (screen coords, camY=0 at start)
+    const imgTopOnScreen = firstPlatY - imgSize/2 + imgOff;
+    // q-overlay bottom = imgTopOnScreen - 10
+    // q-overlay top = q-overlay bottom - q-overlay height
+    const qH = qOverlay.offsetHeight || 70;
+    const qTop = Math.max(5, imgTopOnScreen - qH - 10);
+    qOverlay.style.top = qTop + 'px';
+
     let cy = 400; wl.forEach((level, i) => { 
         cy -= platGap;
         let isL = Math.random() > 0.5; game.platforms.push(makePlat(230, cy, cfg.st.pW, cfg.st.pH, isL, isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); game.platforms.push(makePlat(570, cy, cfg.st.pW, cfg.st.pH, !isL, !isL ? level.a : level.w, wl[i+1]?.q || FINISH_MARKER)); });
@@ -350,8 +364,7 @@ function initGame() {
 function render() {
     if(!game.active) return;
 
-    // q-overlay is always fixed at top
-    qOverlay.style.top = '8px';
+    // q-overlay top is set once in initGame() based on image size
 
     if(!game.won) {
         const p = game.player; const hReal = rabbitImg.offsetHeight || cfg.st.hSize;
@@ -369,7 +382,7 @@ function render() {
                 } else{p.vy=-8;p.targetX=400;if(cfg.audios.err){cfg.audios.err.currentTime=0;cfg.audios.err.play().catch(()=>{});}}
             }
         });
-        game.camY += ((340 - p.y) - game.camY) * 0.1; if(p.y > 650 - game.camY) initGame();
+        game.camY += ((300 - p.y) - game.camY) * 0.1; if(p.y > 650 - game.camY) initGame();
     } else { game.particles.forEach(pt => { pt.x += pt.vx; pt.y += pt.vy; pt.vy+=0.2; pt.life-=0.01; }); }
     draw(); game.loopId = requestAnimationFrame(render);
 }
