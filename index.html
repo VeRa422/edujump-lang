@@ -128,7 +128,7 @@
                 <div class="ui-item"><label>Положение картинки (↑↓)</label><input type="range" id="inp-img-off" min="-60" max="60" value="-8" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Размер картинки на платформе</label><input type="range" id="inp-img-size" min="10" max="120" value="40" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Расстояние между платформами</label><input type="range" id="inp-plat-gap" min="150" max="500" value="220" oninput="liveStyle(); reinitDebounced();"></div>
-                <div class="ui-item"><label>Картинка в вопросе (←→)</label><input type="range" id="inp-qimg-x" min="-300" max="300" value="0" oninput="liveStyle()"></div>
+                <div class="ui-item"><label>Картинка в ответе (←→)</label><input type="range" id="inp-img-x" min="-150" max="150" value="0" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Герой (←→)</label><input type="range" id="inp-hero-x" min="-350" max="350" value="0" oninput="liveStyle(); reinitDebounced();"></div>
                 <div class="ui-item"><label>Стартовая высота платформ (↑↓)</label><input type="range" id="inp-plat-start" min="100" max="380" value="180" oninput="liveStyle(); reinitDebounced();"></div>
             </div>
@@ -274,7 +274,7 @@ function reinitDebounced() {
 function liveStyle() {
     game.feetOffset = parseInt(document.getElementById('inp-off').value) || 0;
     game.parallaxSpeed = parseInt(document.getElementById('inp-para').value) / 100;
-    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7, imgOff: parseInt(document.getElementById('inp-img-off').value) || -8, imgSize: parseInt(document.getElementById('inp-img-size').value) || 40, qImgX: parseInt(document.getElementById('inp-qimg-x').value) || 0, heroX: parseInt(document.getElementById('inp-hero-x').value) || 0 };
+    cfg.st = { font: document.getElementById('st-font').value, fx: document.getElementById('st-fx').value, qBg: document.getElementById('clr-q-bg').value, qBd: document.getElementById('clr-q-bd').value, qTxt: document.getElementById('clr-q-txt').value, glow: document.getElementById('clr-glow').value, winBg: document.getElementById('clr-win-bg').value, winBd: document.getElementById('clr-win-bd').value, winTxt: document.getElementById('clr-win-txt').value, btnBg: document.getElementById('clr-btn-bg').value, btnTxt: document.getElementById('clr-btn-txt').value, ansTxt: document.getElementById('clr-ans-txt').value, useGlow: document.getElementById('st-chk-glow').checked, isTrans: document.getElementById('st-chk-trans').checked, pW: parseInt(document.getElementById('st-p-w').value) || 210, pH: parseInt(document.getElementById('st-p-h').value) || 60, hSize: parseInt(document.getElementById('st-h-size').value) || 60, ansSize: parseInt(document.getElementById('inp-ans-size').value) || 20, ansOff: parseInt(document.getElementById('inp-ans-off').value) || 7, imgOff: parseInt(document.getElementById('inp-img-off').value) || -8, imgSize: parseInt(document.getElementById('inp-img-size').value) || 40, imgX: parseInt(document.getElementById('inp-img-x').value) || 0, heroX: parseInt(document.getElementById('inp-hero-x').value) || 0 };
     
     qOverlay.style.background = cfg.st.qBg; qOverlay.style.borderColor = cfg.st.qBd; qOverlay.style.color = cfg.st.qTxt; qOverlay.style.fontFamily = cfg.st.font;
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
@@ -296,11 +296,11 @@ function liveStyle() {
 function parseImgTags(text) {
     return text
         .replace(/\[img:(https?:\/\/[^\]]+)\]/g, (_, url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; position:relative; left:${cfg.st?.qImgX||0}px;" crossorigin="anonymous">`)
+            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; " crossorigin="anonymous">`)
         .replace(/\[(https?:\/\/[^\]]+)\]/g, (_, url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; position:relative; left:${cfg.st?.qImgX||0}px;" crossorigin="anonymous">`)
+            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; " crossorigin="anonymous">`)
         .replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, (url) => 
-            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; position:relative; left:${cfg.st?.qImgX||0}px;" crossorigin="anonymous">`);
+            `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain; " crossorigin="anonymous">`);
 }
 function updateQ(text) {
     qOverlay.innerHTML = parseImgTags(text);
@@ -389,7 +389,7 @@ function render() {
                     p.vy=0; p.x=plat.x; p.targetX=plat.x; 
                     if(plat.q===FINISH_MARKER) { qOverlay.style.display='none'; triggerWin(); } 
                     else { game.currentQ = plat.q; updateQ(game.currentQ); }
-                } else{p.vy=-8;p.targetX=400;if(cfg.audios.err){cfg.audios.err.currentTime=0;cfg.audios.err.play().catch(()=>{});}}
+                } else{p.vy=-Math.ceil(Math.sqrt(1.6 * (parseInt(document.getElementById('inp-plat-gap').value) || 220)) * 0.5);p.targetX=400+(cfg.st.heroX||0);if(cfg.audios.err){cfg.audios.err.currentTime=0;cfg.audios.err.play().catch(()=>{});}}
             }
         });
         game.camY += ((300 - p.y) - game.camY) * 0.1; if(p.y > 650 - game.camY) initGame();
@@ -415,7 +415,7 @@ function draw() {
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
         if (pl.platImg && pl.platImg.complete && pl.platImg.naturalWidth > 0 && !pl.platImg._failed) {
             const iH = cfg.st.imgSize, iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
-            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
+            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2 + (cfg.st.imgX||0)), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
             if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round(cfg.st.ansSize*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; }
         } else { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; } 
     });
@@ -425,7 +425,7 @@ function draw() {
 
 function triggerWin() { game.won = true; if(cfg.audios.win) { cfg.audios.win.currentTime=0; cfg.audios.win.play().catch(()=>{}); } const fx = cfg.st.fx; for(let i=0; i<80; i++) game.particles.push({ x: game.player.x, y: game.player.y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, c: fx==='fireworks'||fx==='confetti' ? `hsl(${Math.random()*360},70%,60%)` : cfg.st.glow, s: Math.random()*6+2, life: 1 }); winUI.style.display = 'flex'; }
 
-stage.addEventListener('pointerdown', (e) => { if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -20; } }); });
+stage.addEventListener('pointerdown', (e) => { if(!game.active || game.player.vy !== 0 || game.won) return; const r = stage.getBoundingClientRect(), s = r.width/800; const mx = (e.clientX-r.left)/s, my = (e.clientY-r.top)/s - game.camY; game.platforms.forEach(pl => { if (mx > pl.x-pl.w/2 && mx < pl.x+pl.w/2 && my > pl.y-pl.h/2 && my < pl.y+pl.h/2 && pl.y < game.player.y) { game.player.targetX = pl.x; game.player.vy = -Math.ceil(Math.sqrt(1.6 * (parseInt(document.getElementById('inp-plat-gap').value) || 220)) * 1.1); } }); });
 
 window.addEventListener('pointerdown', () => {}, { once: true });
 
@@ -436,7 +436,7 @@ function generateGeniallyCode() {
     const d = { 
         h: document.getElementById('inp-h').value, hw: document.getElementById('inp-h-win').value, b: document.getElementById('inp-b').value, p: document.getElementById('inp-p').value, s_s: document.getElementById('s-start').value, s_o: document.getElementById('s-ok').value, s_e: document.getElementById('s-err').value, s_w: document.getElementById('s-win').value, 
         l: { s: document.getElementById('lbl-start').value, f_q: FINISH_MARKER, w_t: document.getElementById('lbl-win').value, r: document.getElementById('lbl-retry').value }, 
-        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked, platGap: parseInt(document.getElementById('inp-plat-gap').value)||220, platStart: parseInt(document.getElementById('inp-plat-start').value)||180, qImgX: parseInt(document.getElementById('inp-qimg-x').value)||0, heroX: parseInt(document.getElementById('inp-hero-x').value)||0 
+        bulk: document.getElementById('bulk').value, st: cfg.st, para: game.parallaxSpeed, off: game.feetOffset, shuf: document.getElementById('shuffle-check').checked, platGap: parseInt(document.getElementById('inp-plat-gap').value)||220, platStart: parseInt(document.getElementById('inp-plat-start').value)||180, imgX: parseInt(document.getElementById('inp-img-x').value)||0, heroX: parseInt(document.getElementById('inp-hero-x').value)||0 
     };
     
     const dataStr = btoa(encodeURIComponent(JSON.stringify(d)));
@@ -495,7 +495,7 @@ function initFromUrl() {
             if(d.shuf !== undefined) document.getElementById('shuffle-check').checked = d.shuf;
             if(d.platGap !== undefined) document.getElementById('inp-plat-gap').value = d.platGap;
             if(d.platStart !== undefined) document.getElementById('inp-plat-start').value = d.platStart;
-            if(d.qImgX !== undefined) document.getElementById('inp-qimg-x').value = d.qImgX;
+            if(d.imgX !== undefined) document.getElementById('inp-img-x').value = d.imgX;
             if(d.heroX !== undefined) document.getElementById('inp-hero-x').value = d.heroX;
 
             updateRabbit(document.getElementById('inp-h').value);
