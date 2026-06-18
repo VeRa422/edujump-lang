@@ -41,7 +41,7 @@
         #win-title { width: 100%; word-wrap: break-word; font-size: 2.2rem; margin: 10px 0; }
         #creator-credit { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; }
         #creator-credit img { max-width: 140px; height: auto; margin-bottom: 10px; opacity: 0.8; }
-        #q-overlay { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 500px; min-height: 60px; z-index: 50; display: none; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px; box-sizing: border-box; font-weight: bold; font-size: 24px; pointer-events: none; }
+        #q-overlay { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: auto; min-width: 80px; max-width: 600px; min-height: 50px; z-index: 50; display: none; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px 20px; box-sizing: border-box; font-weight: bold; font-size: 24px; pointer-events: none; white-space: nowrap; }
         #q-overlay img { max-height: 52px; max-width: 160px; height: auto; width: auto; vertical-align: middle; border-radius: 4px; object-fit: contain; }
         .lang-opt { padding: 6px 12px; font-size: 11px; color: #fff; cursor: pointer; white-space: nowrap; font-family: 'Nunito', sans-serif; }
         .lang-opt:hover { background: rgba(255,255,255,0.1); }
@@ -267,9 +267,7 @@ function liveStyle() {
     
     qOverlay.style.background = cfg.st.qBg; qOverlay.style.borderColor = cfg.st.qBd; qOverlay.style.color = cfg.st.qTxt; qOverlay.style.fontFamily = cfg.st.font;
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
-    // Push q-overlay down if images are large so they don't overlap
-    const qTopOffset = Math.max(10, Math.round(cfg.st.imgSize * 0.5) - 10);
-    qOverlay.style.top = qTopOffset + 'px';
+    // q-overlay top is updated dynamically in render() based on actual platform positions
     
     rabbitImg.style.width = cfg.st.hSize + 'px'; 
     winRabbitImg.style.width = 'auto'; winRabbitImg.style.maxWidth = '250px'; 
@@ -293,7 +291,17 @@ function parseImgTags(text) {
         .replace(/https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?\S*)?/g, (url) => 
             `<img src="${url}" style="max-height:54px; max-width:180px; height:auto; width:auto; vertical-align:middle; border-radius:4px; margin:0 4px; object-fit:contain;" crossorigin="anonymous">`);
 }
-function updateQ(text) { qOverlay.innerHTML = parseImgTags(text); }
+function updateQ(text) {
+    qOverlay.innerHTML = parseImgTags(text);
+    const plain = text.replace(/\[img:[^\]]*\]/g,'').replace(/\[[^\]]*\]/g,'').replace(/https?:\/\/\S+/g,'').trim();
+    if (plain.length <= 30) {
+        qOverlay.style.whiteSpace = 'nowrap';
+        qOverlay.style.maxWidth = '700px';
+    } else {
+        qOverlay.style.whiteSpace = 'normal';
+        qOverlay.style.maxWidth = '600px';
+    }
+}
 
 function makePlat(x, cy, w, h, isOk, txt, q) {
     const imgMatch = txt.match(/\[img:(https?:\/\/[^\]]+)\]/) || txt.match(/\[(https?:\/\/[^\]]+)\]/) || txt.match(/(https?:\/\/\S+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s|]*)?)(?:\s|$)/);
@@ -336,6 +344,22 @@ function initGame() {
 
 function render() {
     if(!game.active) return;
+
+    // Dynamically position q-overlay so it never overlaps images sitting on top of platforms
+    {
+        let minImgTop = Infinity; // highest point of any visible platform image in canvas coords
+        game.platforms.forEach(pl => {
+            if (!pl.platImg || !pl.platImg.complete || pl.platImg.naturalWidth === 0) return;
+            const platTopInCanvas = pl.y - cfg.st.pH/2 + game.camY;
+            if (platTopInCanvas > 420 || platTopInCanvas < -cfg.st.imgSize*3) return; // off screen
+            const imgTopInCanvas = (pl.y + cfg.st.imgOff) - cfg.st.imgSize/2 + game.camY;
+            if (imgTopInCanvas < minImgTop) minImgTop = imgTopInCanvas;
+        });
+        // Place q-overlay top at least 8px above the highest image, minimum 8px from canvas top
+        const overlayTop = minImgTop === Infinity ? 8 : Math.max(8, minImgTop - qOverlay.offsetHeight - 8);
+        qOverlay.style.top = overlayTop + 'px';
+    }
+
     if(!game.won) {
         const p = game.player; const hReal = rabbitImg.offsetHeight || cfg.st.hSize;
         if (p.vy !== 0 || p.y < (p.lastPlatY - 100)) { p.vy += 0.8; p.y += p.vy; p.x += (p.targetX - p.x) * 0.12; }
