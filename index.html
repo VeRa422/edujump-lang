@@ -267,6 +267,9 @@ function liveStyle() {
     
     qOverlay.style.background = cfg.st.qBg; qOverlay.style.borderColor = cfg.st.qBd; qOverlay.style.color = cfg.st.qTxt; qOverlay.style.fontFamily = cfg.st.font;
     if(cfg.st.useGlow) qOverlay.style.boxShadow = `0 0 20px ${cfg.st.glow}`; else qOverlay.style.boxShadow = "none";
+    // Push q-overlay down if images are large so they don't overlap
+    const qTopOffset = Math.max(10, Math.round(cfg.st.imgSize * 0.5) - 10);
+    qOverlay.style.top = qTopOffset + 'px';
     
     rabbitImg.style.width = cfg.st.hSize + 'px'; 
     winRabbitImg.style.width = 'auto'; winRabbitImg.style.maxWidth = '250px'; 
@@ -371,17 +374,8 @@ function draw() {
     game.platforms.forEach(pl => { 
         if(cfg.pImg) ctx.drawImage(cfg.pImg, pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); else { ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(pl.x-pl.w/2, pl.y-pl.h/2, pl.w, pl.h); }
         if (pl.platImg && pl.platImg.complete && pl.platImg.naturalWidth > 0 && !pl.platImg._failed) {
-            // Size independent of platform height
             const iH = cfg.st.imgSize, iW = pl.platImg.naturalWidth * (iH / pl.platImg.naturalHeight);
-            const imgY = Math.round(pl.y - iH/2 + cfg.st.imgOff);
-            // Clip so image never goes above q-overlay bottom (~100px from canvas top, accounting for camY)
-            const qBottom = 105 - game.camY;
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(pl.x - pl.w/2 - iW, qBottom, pl.w + iW*2, 450);
-            ctx.clip();
-            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), imgY, iW, iH);
-            ctx.restore();
+            ctx.drawImage(pl.platImg, Math.round(pl.x - iW/2), Math.round(pl.y - iH/2 + cfg.st.imgOff), iW, iH);
             if (pl.txt) { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${Math.round(cfg.st.ansSize*0.7)}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; }
         } else { ctx.fillStyle = cfg.st.ansTxt; ctx.font = `bold ${cfg.st.ansSize}px "${cfg.st.font}"`; ctx.textAlign = 'center'; ctx.shadowColor = "rgba(0,0,0,1)"; ctx.shadowBlur = 4; ctx.fillText(pl.txt, Math.round(pl.x), Math.round(pl.y + cfg.st.ansOff)); ctx.shadowBlur = 0; } 
     });
