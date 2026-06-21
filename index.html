@@ -42,7 +42,7 @@
         #win-title { width: 100%; word-wrap: break-word; font-size: 2.2rem; margin: 10px 0; }
         #creator-credit { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 20px; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: rgba(255,255,255,0.3); font-size: 10px; }
         #creator-credit img { max-width: 140px; height: auto; margin-bottom: 10px; opacity: 0.8; }
-        #q-overlay { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: auto; min-width: 80px; max-width: 600px; min-height: 50px; z-index: 50; display: none; align-items: center; justify-content: center; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px 20px; box-sizing: border-box; font-weight: bold; font-size: 24px; pointer-events: none; white-space: nowrap; }
+        #q-overlay { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: auto; min-width: 80px; max-width: 750px; min-height: 50px; z-index: 50; display: none; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; border: 3px solid #fff; border-radius: 10px; text-align: center; padding: 10px 20px; box-sizing: border-box; font-weight: bold; font-size: 22px; pointer-events: none; white-space: normal; word-break: break-word; }
         #q-overlay img { max-height: 52px; max-width: 160px; height: auto; width: auto; vertical-align: middle; border-radius: 4px; object-fit: contain; }
         .lang-opt { padding: 6px 12px; font-size: 11px; color: #fff; cursor: pointer; white-space: nowrap; font-family: 'Nunito', sans-serif; }
         .lang-opt:hover { background: rgba(255,255,255,0.1); }
@@ -293,9 +293,6 @@ function parseImgTags(text) {
 }
 function updateQ(text) {
     qOverlay.innerHTML = parseImgTags(text);
-    const plain = text.replace(/\[img:[^\]]*\]/g,'').replace(/\[[^\]]*\]/g,'').replace(/https?:\/\/\S+/g,'').trim();
-    if (plain.length <= 30) { qOverlay.style.whiteSpace = 'nowrap'; qOverlay.style.maxWidth = '700px'; }
-    else { qOverlay.style.whiteSpace = 'normal'; qOverlay.style.maxWidth = '600px'; }
 }
 
 function makePlat(x, cy, w, h, isOk, txt, q) {
